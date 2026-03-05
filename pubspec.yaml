@@ -23,4 +23,5 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/logo.png
+    - assets/kkobulang.png
+    - assets/kkobulang_logo.png

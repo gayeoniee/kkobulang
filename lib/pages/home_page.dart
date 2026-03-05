@@ -28,7 +28,7 @@ class HomePage extends StatelessWidget {
     return CustomScrollView(slivers: [
       SliverAppBar(
         floating: true,
-        title: Image.asset('assets/logo.png', height: 32, fit: BoxFit.contain),
+        title: Image.asset('assets/kkobulang_logo.png', height: 30, fit: BoxFit.contain),
         actions: [
           IconButton(icon: const Icon(Icons.notifications_outlined), onPressed: () {}),
           IconButton(icon: const Icon(Icons.search), onPressed: () {}),

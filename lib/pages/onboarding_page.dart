@@ -158,11 +158,14 @@ class _SplashScreenState extends State<_SplashScreen> with SingleTickerProviderS
   Widget build(BuildContext context) => Container(
     decoration: const BoxDecoration(gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [AppColors.cream, AppColors.peachLight])),
     child: Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
-      ScaleTransition(scale: _s, child: Image.asset('assets/logo.png', width: 160)),
-      const SizedBox(height: 12),
-      Text('꼬불랑', style: GoogleFonts.notoSansKr(fontSize: 30, fontWeight: FontWeight.w800, color: AppColors.brown)),
-      const SizedBox(height: 4),
-      Text('내 곱슬에 맞는 케어를 찾아봐요', style: GoogleFonts.notoSansKr(fontSize: 13, color: AppColors.brownLight)),
+      ScaleTransition(
+        scale: _s,
+        child: Image.asset('assets/kkobulang.png', width: 180),
+      ),
+      const SizedBox(height: 16),
+      Image.asset('assets/kkobulang_logo.png', width: 130),
+      const SizedBox(height: 8),
+      Text('내 곱슬에 맞는 케어를 찾아봐요', style: GoogleFonts.notoSansKr(fontSize: 13, color: AppColors.brownMid)),
     ])),
   );
 }
@@ -184,17 +187,15 @@ class _WelcomeScreen extends StatelessWidget {
         begin: Alignment.topLeft, end: Alignment.bottomRight,
         colors: [AppColors.cream, AppColors.peachLight, AppColors.tealLight], stops: [0, 0.55, 1])),
       child: SafeArea(child: Padding(
-        padding: const EdgeInsets.fromLTRB(28, 32, 28, 0),
+        padding: const EdgeInsets.fromLTRB(28, 24, 28, 0),
         child: Column(children: [
-          Image.asset('assets/logo.png', width: 120),
-          const SizedBox(height: 16),
-          Text('꼬불랑에\n오신 걸 환영해요 👋',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.notoSansKr(fontSize: 26, fontWeight: FontWeight.w800, color: AppColors.brown, height: 1.35)),
+          Image.asset('assets/kkobulang.png', width: 140),
           const SizedBox(height: 8),
-          Text('한국 곱슬머리를 위한 케어 정보와\n커뮤니티 공간이에요 🌸',
+          Image.asset('assets/kkobulang_logo.png', width: 110),
+          const SizedBox(height: 12),
+          Text('한국 곱슬머리를 위한\n케어 정보와 커뮤니티 공간이에요',
             textAlign: TextAlign.center,
-            style: GoogleFonts.notoSansKr(fontSize: 15, color: AppColors.brownMid, height: 1.65)),
+            style: GoogleFonts.notoSansKr(fontSize: 14, color: AppColors.brownMid, height: 1.65)),
           const SizedBox(height: 28),
           // 3 feature blocks
           Row(children: blocks.map((b) {
