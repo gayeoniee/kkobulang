@@ -31,7 +31,6 @@ final List<CurlType> curlTypes = [
 ];
 
 final List<Product> products = [
-  // 샴푸
   Product(id: 1, category: 'shampoo', name: '미쟝센 퍼펙트 세럼 샴푸', brand: '미쟝센', price: '9,900원',
     rating: 4.3, reviewCount: 182, types: ['2A','2B','2C','3A'], img: '🧴',
     desc: '손상된 곱슬모에 영양을 채워주는 세럼 샴푸. 실리콘 프리로 두피 자극을 줄였어요.',
@@ -48,8 +47,6 @@ final List<Product> products = [
     rating: 3.9, reviewCount: 73, types: ['2A','2B','4A'], img: '🧴',
     desc: '두피 건강과 모발 볼륨을 동시에 챙기는 한방 성분 샴푸.',
     tags: ['두피케어', '볼륨', '한방']),
-
-  // 트리트먼트
   Product(id: 5, category: 'treatment', name: '모로칸오일 인텐스 하이드레이팅 마스크', brand: '모로칸오일', price: '48,000원',
     rating: 4.8, reviewCount: 312, types: ['3A','3B','3C','4A','4B','4C'], img: '💆',
     desc: '아르간 오일 함유 딥 모이스처 헤어 마스크. 건조하고 뻣뻣한 컬을 부드럽게 만들어줘요.',
@@ -62,19 +59,17 @@ final List<Product> products = [
     rating: 4.4, reviewCount: 201, types: ['2C','3A','3B','3C'], img: '💆',
     desc: '그린티 성분으로 두피와 모발을 동시에 케어. 가벼운 텍스처로 과한 무게감이 없어요.',
     tags: ['그린티', '두피케어', '가벼운텍스처']),
-
-  // 컬 크림
   Product(id: 8, category: 'curlcream', name: '캐니스 컬 디파이닝 크림', brand: '캐니스', price: '22,000원',
     rating: 4.6, reviewCount: 389, types: ['3A','3B','3C'], img: '✨',
     desc: '한국 3형 컬에 최적화된 컬 크림. 습도에 강하고 하루 종일 컬을 유지해줘요.',
     tags: ['컬유지', '안티프리즈', '국산']),
   Product(id: 9, category: 'curlcream', name: 'LG 리엔 엘라스틴 컬리 크림', brand: 'LG', price: '11,000원',
     rating: 3.8, reviewCount: 67, types: ['2B','2C','3A'], img: '✨',
-    desc: '가벼운 텍스처로 웨이비 타입에게 적합한 컬 크림. 떡짐 없이 자연스러운 웨이브를 만들어요.',
+    desc: '가벼운 텍스처로 웨이비 타입에게 적합한 컬 크림. 자연스러운 웨이브를 만들어요.',
     tags: ['가벼운', '웨이비', '자연스러운']),
   Product(id: 10, category: 'curlcream', name: '데브아컬 슈퍼 크림', brand: 'DevaCurl', price: '42,000원',
     rating: 4.9, reviewCount: 528, types: ['3B','3C','4A','4B'], img: '✨',
-    desc: 'CGM 전설적인 컬 크림. 두껍고 진한 텍스처로 코일/타이트 컬에 최고의 보습과 정의감을 선사해요.',
+    desc: 'CGM 전설적인 컬 크림. 두껍고 진한 텍스처로 코일/타이트 컬에 최고의 보습과 정의감.',
     tags: ['CGM', '딥모이스처', '코일용']),
   Product(id: 11, category: 'curlcream', name: '뷰나 컬링 젤리 크림', brand: '뷰나', price: '15,500원',
     rating: 4.4, reviewCount: 177, types: ['2C','3A','3B','3C','4A'], img: '✨',
@@ -82,35 +77,58 @@ final List<Product> products = [
     tags: ['젤리타입', '수분', '컬정의']),
 ];
 
+// 고정 게시글
+final List<CommunityPost> pinnedPosts = [
+  CommunityPost(
+    id: -1, author: '꼬불랑 관리자', avatar: '🏢', curlType: '', time: '고정글',
+    title: '꼬불랑 커뮤니티 이용 안내',
+    content: '꼬불랑 커뮤니티에 오신 것을 환영해요! 서로를 존중하며 곱슬 케어 정보를 자유롭게 나눠요 🌿 부적절한 게시글은 신고 부탁드립니다.',
+    likes: 0, comments: 0, tags: ['공지'], hasImage: false,
+    postType: 'notice', isPinned: true,
+  ),
+  CommunityPost(
+    id: -2, author: '꼬불랑 에디터', avatar: '✍️', curlType: '', time: '고정글',
+    title: '내 곱슬 유형 제대로 알기 - 완전 정복 가이드',
+    content: '내 곱슬 유형을 제대로 알면 케어가 달라져요! 2A부터 4C까지 유형별 특징과 추천 루틴을 정리했어요. 온보딩 설문에서 유형을 바꿀 수 있어요.',
+    likes: 128, comments: 34, tags: ['가이드', '곱슬유형', '필독'], hasImage: true,
+    postType: 'guide', isPinned: true,
+  ),
+];
+
 List<CommunityPost> communityPosts = [
   CommunityPost(id: 1, author: '수진이', avatar: '🌸', curlType: '3B', time: '2시간 전',
+    title: 'LOC 방법 드디어 성공!',
     content: '드디어 LOC 방법 성공했어요!! 3주 동안 매일 다르게 해봤는데 이게 제일 잘 맞네요. 컬크림 바르기 전에 리브인 컨디셔너 꼭 써보세요 🙌',
-    likes: 24, comments: 8, tags: ['LOC방법', '3B', '컬케어팁'], hasImage: true),
+    likes: 24, comments: 8, tags: ['LOC방법', '3B', '컬케어팁'], hasImage: true, postType: 'tip'),
   CommunityPost(id: 2, author: '곱슬요정', avatar: '🌿', curlType: '2C', time: '5시간 전',
+    title: '안티프리즈 세럼 추천해주세요',
     content: '습도 때문에 완전 부스스해진 날... 안티프리즈 세럼 찾고 있는데 추천해주실 분? 2C 타입이에요',
-    likes: 7, comments: 12, tags: ['2C', '안티프리즈', '추천요청'], hasImage: false),
+    likes: 7, comments: 12, tags: ['2C', '안티프리즈', '추천요청'], hasImage: false, postType: 'help'),
   CommunityPost(id: 3, author: '컬리걸서울', avatar: '🍥', curlType: '3C', time: '어제',
+    title: '데브아컬 슈퍼크림 솔직 후기',
     content: '데브아컬 슈퍼크림 후기 올려요! 진짜 비싼데 그만한 가치가 있는 것 같아요. 3C 타입인데 드디어 컬이 정의가 됩니다 ㅠㅠ',
-    likes: 41, comments: 19, tags: ['3C', '데브아컬', '제품후기'], hasImage: true),
+    likes: 41, comments: 19, tags: ['3C', '데브아컬', '제품후기'], hasImage: true, postType: 'product'),
   CommunityPost(id: 4, author: '새벽곱슬', avatar: '⚡', curlType: '4B', time: '어제',
+    title: '트위스트 아웃 루틴 공유',
     content: '4B 친구들 모여라~ 밤에 트위스트 아웃 해두면 아침에 컬이 엄청 예쁘게 나와요. 새틴 스카프도 필수고요!',
-    likes: 18, comments: 5, tags: ['4B', '트위스트아웃', '루틴팁'], hasImage: false),
+    likes: 18, comments: 5, tags: ['4B', '트위스트아웃', '루틴팁'], hasImage: false, postType: 'tip'),
   CommunityPost(id: 5, author: '진지한웨이비', avatar: '🌊', curlType: '2B', time: '2일 전',
+    title: 'CGM 2달째 변화 일지',
     content: 'CGM 시작한 지 2달째! 예전엔 웨이브가 있는지도 몰랐는데 이제 진짜 웨이비한 모습이 나와요. 설페이트프리 샴푸로 바꾼 게 가장 큰 변화였어요.',
-    likes: 35, comments: 14, tags: ['2B', 'CGM', '변화일지'], hasImage: true),
+    likes: 35, comments: 14, tags: ['2B', 'CGM', '변화일지'], hasImage: true, postType: 'tip'),
 ];
 
 List<DiaryEntry> diaryEntries = [
-  DiaryEntry(id: 1, date: DateTime(2024, 3, 1), mood: '😊',
-    routine: ['CGM 저자극 클렌징 샴푸', '모로칸오일 마스크', '캐니스 컬크림'],
+  DiaryEntry(id: 1, date: DateTime(2024, 3, 1),
+    routine: ['샴푸', '딥컨디셔닝', '리브인컨디셔너', '컬크림'],
     result: 4, memo: '오늘 컬이 정말 잘 살았다! LOC 방법대로 했더니 확실히 촉촉함이 오래 간다.',
-    tags: ['성공', 'LOC방법']),
-  DiaryEntry(id: 2, date: DateTime(2024, 2, 26), mood: '😅',
-    routine: ['리엔 샴푸', '케라시스 트리트먼트'],
+    tags: ['성공', 'LOC방법'], hasPhoto: true),
+  DiaryEntry(id: 2, date: DateTime(2024, 2, 26),
+    routine: ['샴푸', '컨디셔너'],
     result: 2, memo: '비 온 날... 외출 후 완전 부스스해짐. 안티프리즈 제품 필요할 것 같다.',
-    tags: ['실패', '습도']),
-  DiaryEntry(id: 3, date: DateTime(2024, 2, 22), mood: '🥰',
-    routine: ['CGM 샴푸', '이니스프리 딥케어팩', '뷰나 컬링젤리크림'],
+    tags: ['실패', '습도'], hasPhoto: false),
+  DiaryEntry(id: 3, date: DateTime(2024, 2, 22),
+    routine: ['샴푸', '딥컨디셔닝', '컬크림', '디퓨저건조'],
     result: 5, memo: '딥케어팩 20분 했더니 모발이 완전 부드러워짐. 이 루틴 계속 써야겠다!',
-    tags: ['완벽루틴', '딥케어']),
+    tags: ['완벽루틴', '딥케어'], hasPhoto: true),
 ];
