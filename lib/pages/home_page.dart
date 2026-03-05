@@ -23,7 +23,6 @@ class HomePage extends StatelessWidget {
     final typeInfo = curlTypes.firstWhere((t) => t.id == curlType, orElse: () => curlTypes[4]);
     final typeColor = AppColors.curlTypeColor(curlType);
     final recProducts = products.where((p) => p.types.contains(curlType)).take(5).toList();
-    final recentPosts = communityPosts.take(3).toList();
     final latestDiary = diaryEntries.isNotEmpty ? diaryEntries.first : null;
 
     return CustomScrollView(slivers: [
@@ -121,6 +120,20 @@ class HomePage extends StatelessWidget {
           ),
           const SizedBox(height: 24),
 
+          // ── 추천 루틴 ──
+          SectionHeader('✨ 추천 루틴', onSeeAll: () => onNavigate(3)),
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 200,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: _sampleRoutines.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 12),
+              itemBuilder: (_, i) => _RoutineCard(routine: _sampleRoutines[i]),
+            ),
+          ),
+          const SizedBox(height: 24),
+
           // ── 추천 제품 ──
           SectionHeader('🛍 나에게 맞는 제품', onSeeAll: () => onNavigate(1)),
           const SizedBox(height: 12),
@@ -135,15 +148,6 @@ class HomePage extends StatelessWidget {
                   itemBuilder: (_, i) => _ProductMiniCard(product: recProducts[i]),
                 ),
           ),
-          const SizedBox(height: 24),
-
-          // ── 커뮤니티 ──
-          SectionHeader('💬 커뮤니티 최신 글', onSeeAll: () => onNavigate(3)),
-          const SizedBox(height: 12),
-          ...recentPosts.map((post) => Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: _MiniPostCard(post: post),
-          )),
         ])),
       ),
     ]);
@@ -245,40 +249,110 @@ class _ProductMiniCard extends StatelessWidget {
   );
 }
 
-class _MiniPostCard extends StatelessWidget {
-  final CommunityPost post;
-  const _MiniPostCard({required this.post});
+// ── 추천 루틴 데이터 ──
+const _sampleRoutines = [
+  (
+    author: '수진이',
+    avatar: '🌸',
+    curlType: '3B',
+    name: 'LOC 딥케어 루틴',
+    steps: ['샴푸', '딥컨디셔닝', '리브인컨디셔너', '컬크림', '디퓨저건조'],
+    tip: '컨디셔너를 5분 이상 두면 훨씬 촉촉해요!',
+  ),
+  (
+    author: '컬리걸서울',
+    avatar: '🍥',
+    curlType: '3C',
+    name: 'CGM 기본 루틴',
+    steps: ['저자극샴푸', '컨디셔너', '스쿼시', '젤', '플롭건조'],
+    tip: '설페이트프리 샴푸로 바꾸면 컬이 살아나요',
+  ),
+  (
+    author: '진지한웨이비',
+    avatar: '🌊',
+    curlType: '2C',
+    name: '웨이비 간단 루틴',
+    steps: ['샴푸', '컨디셔너', '무스', '자연건조'],
+    tip: '무거운 제품은 피하고 가볍게 마무리!',
+  ),
+  (
+    author: '새벽곱슬',
+    avatar: '⚡',
+    curlType: '4B',
+    name: '트위스트아웃 루틴',
+    steps: ['공샴', '딥컨디셔닝', '리브인', '버터', '트위스트', '새틴나이트캡'],
+    tip: '밤에 해두면 아침에 컬이 예쁘게 펴져요',
+  ),
+];
+
+class _RoutineCard extends StatelessWidget {
+  final ({String author, String avatar, String curlType, String name, List<String> steps, String tip}) routine;
+  const _RoutineCard({required this.routine});
+
   @override
   Widget build(BuildContext context) {
-    final postTypes = {'notice':'📢','guide':'📖','salon':'💈','tip':'💡','product':'🛍','help':'🙏'};
-    return AppCard(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Row(children: [
-        Text(postTypes[post.postType] ?? '💬', style: const TextStyle(fontSize: 16)),
-        const SizedBox(width: 6),
-        Container(width: 34, height: 34,
-          decoration: BoxDecoration(color: AppColors.peachLight, shape: BoxShape.circle),
-          child: Center(child: Text(post.avatar, style: const TextStyle(fontSize: 18)))),
-        const SizedBox(width: 6),
-        Expanded(child: Row(children: [
-          Text(post.author, style: GoogleFonts.notoSansKr(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.brown)),
+    return Container(
+      width: 240,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: const [BoxShadow(color: Color(0x143D2B1F), blurRadius: 8, offset: Offset(0, 2))],
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        // Author row
+        Row(children: [
+          Container(
+            width: 28, height: 28,
+            decoration: BoxDecoration(color: AppColors.peachLight, shape: BoxShape.circle),
+            child: Center(child: Text(routine.avatar, style: const TextStyle(fontSize: 14))),
+          ),
           const SizedBox(width: 6),
-          if (post.curlType.isNotEmpty) CurlTypeBadge(post.curlType),
-        ])),
-        Text(post.time, style: GoogleFonts.notoSansKr(fontSize: 11, color: AppColors.brownLight)),
+          Text(routine.author, style: GoogleFonts.notoSansKr(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.brown)),
+          const SizedBox(width: 6),
+          CurlTypeBadge(routine.curlType),
+        ]),
+        const SizedBox(height: 8),
+        Text(routine.name, style: GoogleFonts.notoSansKr(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.brown)),
+        const SizedBox(height: 8),
+        // Steps flow
+        Wrap(
+          spacing: 4, runSpacing: 4,
+          children: [
+            for (int i = 0; i < routine.steps.length; i++) ...[
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                decoration: BoxDecoration(
+                  color: AppColors.tealLight,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(routine.steps[i],
+                  style: GoogleFonts.notoSansKr(fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.tealDark)),
+              ),
+              if (i < routine.steps.length - 1)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 3),
+                  child: Text('→', style: TextStyle(fontSize: 10, color: AppColors.brownLight)),
+                ),
+            ],
+          ],
+        ),
+        const Spacer(),
+        // Tip
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            const Text('💡', style: TextStyle(fontSize: 11)),
+            const SizedBox(width: 4),
+            Expanded(child: Text(routine.tip,
+              style: GoogleFonts.notoSansKr(fontSize: 10, color: AppColors.brownMid, height: 1.4))),
+          ]),
+        ),
       ]),
-      const SizedBox(height: 8),
-      if (post.title.isNotEmpty)
-        Text(post.title, maxLines: 1, overflow: TextOverflow.ellipsis,
-          style: GoogleFonts.notoSansKr(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.brown)),
-      const SizedBox(height: 2),
-      Text(post.content, maxLines: 2, overflow: TextOverflow.ellipsis,
-        style: GoogleFonts.notoSansKr(fontSize: 12, color: AppColors.brownMid, height: 1.4)),
-      const SizedBox(height: 6),
-      Row(children: [
-        Text('❤️ ${post.likes}', style: GoogleFonts.notoSansKr(fontSize: 11, color: AppColors.brownLight)),
-        const SizedBox(width: 10),
-        Text('💬 ${post.comments}', style: GoogleFonts.notoSansKr(fontSize: 11, color: AppColors.brownLight)),
-      ]),
-    ]));
+    );
   }
 }

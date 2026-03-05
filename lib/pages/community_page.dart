@@ -158,6 +158,18 @@ class _CommunityPageState extends State<CommunityPage> {
             },
           ),
         ),
+        // Search bar
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+          child: TextField(
+            onChanged: (_) => setState(() {}),
+            decoration: const InputDecoration(
+              hintText: '게시글, 태그 검색...',
+              prefixIcon: Icon(Icons.search, color: AppColors.brownLight),
+              contentPadding: EdgeInsets.symmetric(vertical: 10),
+            ),
+          ),
+        ),
         const SizedBox(height: 10),
 
         Expanded(
