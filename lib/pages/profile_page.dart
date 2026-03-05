@@ -13,6 +13,22 @@ class ProfilePage extends StatefulWidget {
   State<ProfilePage> createState() => _ProfilePageState();
 }
 
+String _gradeEmoji(int posts) {
+  if (posts >= 50) return '🍑';
+  if (posts >= 20) return '🌺';
+  if (posts >= 10) return '🌸';
+  if (posts >= 3) return '🌿';
+  return '🌱';
+}
+
+String _gradeLabel(int posts) {
+  if (posts >= 50) return '열매';
+  if (posts >= 20) return '꽃';
+  if (posts >= 10) return '꽃봉오리';
+  if (posts >= 3) return '새싹';
+  return '씨앗';
+}
+
 class _ProfilePageState extends State<ProfilePage> {
   bool _editing = false;
   late TextEditingController _nickCtrl;
@@ -89,8 +105,20 @@ class _ProfilePageState extends State<ProfilePage> {
                       decoration: const InputDecoration(contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8)),
                     )
                   else
+                    Row(children: [
                     Text(_nickCtrl.text, style: GoogleFonts.notoSansKr(
-                      fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.brown)),
+                        fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.brown)),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: AppColors.tealLight,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text('${_gradeEmoji(7)} ${_gradeLabel(7)}',
+                        style: GoogleFonts.notoSansKr(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.teal)),
+                    ),
+                  ]),
                   const SizedBox(height: 6),
                   CurlTypeBadge(widget.curlType, large: true),
                 ])),
@@ -117,7 +145,6 @@ class _ProfilePageState extends State<ProfilePage> {
               Row(children: [
                 _StatCol('3', '게시글'),
                 _StatCol('7', '일지'),
-                _StatCol('12', '팔로워'),
               ]),
             ]),
           ),

@@ -5,6 +5,42 @@ import '../data/seed_data.dart';
 import '../models/models.dart';
 import '../widgets/common_widgets.dart';
 
+String postTypeIcon(String type) {
+  switch (type) {
+    case 'notice': return '📢';
+    case 'guide': return '📖';
+    case 'salon': return '💈';
+    case 'tip': return '💡';
+    case 'product': return '🛍';
+    case 'help': return '🙏';
+    default: return '💬';
+  }
+}
+
+String postTypeLabel(String type) {
+  switch (type) {
+    case 'notice': return '공지';
+    case 'guide': return '가이드';
+    case 'salon': return '미용실';
+    case 'tip': return '꿀팁';
+    case 'product': return '제품';
+    case 'help': return '도와주세요';
+    default: return '기타';
+  }
+}
+
+Color postTypeColor(String type) {
+  switch (type) {
+    case 'notice': return const Color(0xFF9B59B6);
+    case 'guide': return const Color(0xFF2980B9);
+    case 'salon': return AppColors.teal;
+    case 'tip': return const Color(0xFFF39C12);
+    case 'product': return AppColors.peach;
+    case 'help': return AppColors.type4;
+    default: return AppColors.brownMid;
+  }
+}
+
 class CommunityPage extends StatefulWidget {
   final String curlType;
   const CommunityPage({super.key, required this.curlType});
@@ -17,7 +53,8 @@ class _CommunityPageState extends State<CommunityPage> {
   String _filter = '전체';
   final Set<int> _liked = {};
 
-  final _filters = ['전체', '2A','2B','2C','3A','3B','3C','4A','4B','4C'];
+  final _filters = ['전체', '💈미용실', '💡꿀팁', '🛍제품', '🙏도와주세요'];
+  final _filterKeys = ['전체', 'salon', 'tip', 'product', 'help'];
 
   @override
   void initState() {
@@ -25,18 +62,32 @@ class _CommunityPageState extends State<CommunityPage> {
     _posts = List.from(communityPosts);
   }
 
-  List<CommunityPost> get _filtered =>
-    _filter == '전체' ? _posts : _posts.where((p) => p.curlType == _filter).toList();
+  List<CommunityPost> get _filtered {
+    if (_filter == '전체') return _posts;
+    final filterKey = _filterKeys[_filters.indexOf(_filter)];
+    return _posts.where((p) => p.postType == filterKey).toList();
+  }
 
   void _toggleLike(int id) {
     setState(() {
-      final post = _posts.firstWhere((p) => p.id == id);
+      final idx = _posts.indexWhere((p) => p.id == id);
+      if (idx == -1) return;
       if (_liked.contains(id)) {
         _liked.remove(id);
-        post.likes--;
+        _posts[idx].likes--;
       } else {
         _liked.add(id);
-        post.likes++;
+        _posts[idx].likes++;
+      }
+    });
+  }
+
+  void _togglePinnedLike(int id) {
+    setState(() {
+      if (_liked.contains(id)) {
+        _liked.remove(id);
+      } else {
+        _liked.add(id);
       }
     });
   }
@@ -71,7 +122,7 @@ class _CommunityPageState extends State<CommunityPage> {
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 textStyle: GoogleFonts.notoSansKr(fontSize: 13, fontWeight: FontWeight.w700),
               ),
-              child: const Text('글 쓰기 ✏️'),
+              child: const Text('글 쓰기'),
             ),
           ),
         ],
@@ -98,7 +149,7 @@ class _CommunityPageState extends State<CommunityPage> {
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: const [BoxShadow(color: Color(0x123D2B1F), blurRadius: 4, offset: Offset(0,1))],
                   ),
-                  child: Text(f == '전체' ? '🌿 전체' : f,
+                  child: Text(f,
                     style: GoogleFonts.notoSansKr(
                       fontSize: 13, fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
                       color: isActive ? Colors.white : AppColors.brownMid)),
@@ -107,41 +158,53 @@ class _CommunityPageState extends State<CommunityPage> {
             },
           ),
         ),
-
-        // Search
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
-          child: TextField(
-            decoration: const InputDecoration(
-              hintText: '게시글, 태그 검색...',
-              prefixIcon: Icon(Icons.search, color: AppColors.brownLight),
-              contentPadding: EdgeInsets.symmetric(vertical: 10),
-            ),
-          ),
-        ),
         const SizedBox(height: 10),
 
         Expanded(
-          child: filtered.isEmpty
-            ? Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
-                const Text('💬', style: TextStyle(fontSize: 48)),
-                const SizedBox(height: 12),
-                Text('아직 글이 없어요', style: GoogleFonts.notoSansKr(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.brownMid)),
-              ]))
-            : ListView.separated(
-                padding: const EdgeInsets.fromLTRB(20, 4, 20, 100),
-                itemCount: filtered.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 12),
-                itemBuilder: (_, i) => _PostCard(
+          child: ListView.separated(
+            padding: const EdgeInsets.fromLTRB(20, 4, 20, 100),
+            itemCount: (_filter == '전체' ? pinnedPosts.length : 0) + (filtered.isEmpty ? 1 : filtered.length),
+            separatorBuilder: (_, __) => const SizedBox(height: 12),
+            itemBuilder: (_, i) {
+              if (_filter == '전체') {
+                if (i < pinnedPosts.length) {
+                  final post = pinnedPosts[i];
+                  return _PostCard(
+                    post: post,
+                    liked: _liked.contains(post.id),
+                    onLike: () => _togglePinnedLike(post.id),
+                  );
+                }
+                final fi = i - pinnedPosts.length;
+                if (filtered.isEmpty) {
+                  return _emptyState();
+                }
+                return _PostCard(
+                  post: filtered[fi],
+                  liked: _liked.contains(filtered[fi].id),
+                  onLike: () => _toggleLike(filtered[fi].id),
+                );
+              } else {
+                if (filtered.isEmpty) return _emptyState();
+                return _PostCard(
                   post: filtered[i],
                   liked: _liked.contains(filtered[i].id),
                   onLike: () => _toggleLike(filtered[i].id),
-                ),
-              ),
+                );
+              }
+            },
+          ),
         ),
       ]),
     );
   }
+
+  Widget _emptyState() => Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
+    const SizedBox(height: 40),
+    const Text('💬', style: TextStyle(fontSize: 48)),
+    const SizedBox(height: 12),
+    Text('아직 글이 없어요', style: GoogleFonts.notoSansKr(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.brownMid)),
+  ]));
 }
 
 class _PostCard extends StatefulWidget {
@@ -159,26 +222,61 @@ class _PostCardState extends State<_PostCard> {
   @override
   Widget build(BuildContext context) {
     final post = widget.post;
+    final isPinned = post.isPinned;
+    final typeColor = postTypeColor(post.postType);
+
     return AppCard(
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        // Header
+        // Post type badge at top-left
         Row(children: [
           Container(
-            width: 36, height: 36,
-            decoration: BoxDecoration(color: AppColors.peachLight, shape: BoxShape.circle),
-            child: Center(child: Text(post.avatar, style: const TextStyle(fontSize: 18))),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            decoration: BoxDecoration(
+              color: typeColor.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: typeColor.withValues(alpha: 0.3)),
+            ),
+            child: Row(mainAxisSize: MainAxisSize.min, children: [
+              Text(postTypeIcon(post.postType), style: const TextStyle(fontSize: 11)),
+              const SizedBox(width: 3),
+              Text(postTypeLabel(post.postType),
+                style: GoogleFonts.notoSansKr(fontSize: 11, fontWeight: FontWeight.w700, color: typeColor)),
+            ]),
           ),
-          const SizedBox(width: 8),
-          Expanded(child: Row(children: [
-            Text(post.author, style: GoogleFonts.notoSansKr(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.brown)),
+          if (isPinned) ...[
             const SizedBox(width: 6),
-            CurlTypeBadge(post.curlType),
-          ])),
+            Icon(Icons.push_pin_rounded, size: 13, color: AppColors.brownLight),
+          ],
+          const Spacer(),
           Text(post.time, style: GoogleFonts.notoSansKr(fontSize: 11, color: AppColors.brownLight)),
         ]),
         const SizedBox(height: 10),
 
-        Text(post.content, style: GoogleFonts.notoSansKr(fontSize: 14, color: AppColors.brown, height: 1.6)),
+        // Author row
+        Row(children: [
+          Container(
+            width: 32, height: 32,
+            decoration: BoxDecoration(color: AppColors.peachLight, shape: BoxShape.circle),
+            child: Center(child: Text(post.avatar, style: const TextStyle(fontSize: 16))),
+          ),
+          const SizedBox(width: 8),
+          Text(post.author, style: GoogleFonts.notoSansKr(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.brown)),
+          if (post.curlType.isNotEmpty) ...[
+            const SizedBox(width: 6),
+            CurlTypeBadge(post.curlType),
+          ],
+        ]),
+        const SizedBox(height: 8),
+
+        // Title
+        if (post.title.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 4),
+            child: Text(post.title,
+              style: GoogleFonts.notoSansKr(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.brown)),
+          ),
+
+        Text(post.content, style: GoogleFonts.notoSansKr(fontSize: 14, color: AppColors.brownMid, height: 1.6)),
 
         if (post.hasImage) ...[
           const SizedBox(height: 10),
@@ -192,13 +290,15 @@ class _PostCardState extends State<_PostCard> {
           ),
         ],
 
-        const SizedBox(height: 10),
-        Wrap(spacing: 6, runSpacing: 6,
-          children: post.tags.map((t) => Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-            decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(20)),
-            child: Text('#$t', style: GoogleFonts.notoSansKr(fontSize: 11, color: AppColors.brownMid)),
-          )).toList()),
+        if (post.tags.isNotEmpty) ...[
+          const SizedBox(height: 10),
+          Wrap(spacing: 6, runSpacing: 6,
+            children: post.tags.map((t) => Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(20)),
+              child: Text('#$t', style: GoogleFonts.notoSansKr(fontSize: 11, color: AppColors.brownMid)),
+            )).toList()),
+        ],
 
         const SizedBox(height: 10),
         const Divider(color: AppColors.surface, height: 1),
@@ -207,7 +307,7 @@ class _PostCardState extends State<_PostCard> {
         Row(children: [
           _ActionBtn(
             icon: widget.liked ? '❤️' : '🤍',
-            label: '${post.likes}',
+            label: '${post.likes + (widget.liked && !post.isPinned ? 0 : 0)}',
             active: widget.liked,
             onTap: widget.onLike,
           ),
@@ -274,6 +374,8 @@ class _ActionBtn extends StatelessWidget {
   );
 }
 
+// --------------- Post Form ---------------
+
 class _PostForm extends StatefulWidget {
   final String curlType;
   final void Function(CommunityPost) onSave;
@@ -283,62 +385,189 @@ class _PostForm extends StatefulWidget {
 }
 
 class _PostFormState extends State<_PostForm> {
-  final _ctrl = TextEditingController();
+  final _titleCtrl = TextEditingController();
+  final _contentCtrl = TextEditingController();
+  String _postType = 'tip';
+  final Set<String> _selectedTags = {};
+  bool _hasPhoto = false;
+
+  final _postTypes = [
+    ('tip', '💡', '꿀팁'),
+    ('salon', '💈', '미용실'),
+    ('product', '🛍', '제품'),
+    ('help', '🙏', '도와주세요'),
+  ];
+
+  final _curlTypeTags = ['2A','2B','2C','3A','3B','3C','4A','4B','4C'];
+  final _regionTags = ['서울 강남', '서울 홍대', '서울 성수', '경기 분당', '부산', '대구', '인천'];
+  final _productTags = ['샴푸', '트리트먼트', '컬크림', '세럼', '젤', '오일'];
+
   @override
-  void dispose() { _ctrl.dispose(); super.dispose(); }
+  void dispose() { _titleCtrl.dispose(); _contentCtrl.dispose(); super.dispose(); }
+
+  List<String> get _tagOptions {
+    final options = <String>[...curlTypeTags.map((t) => t)];
+    if (_postType == 'salon') options.addAll(_regionTags);
+    if (_postType == 'product') options.addAll(_productTags);
+    return options;
+  }
+
+  List<String> get curlTypeTags => _curlTypeTags;
+
+  bool get _canPost => _titleCtrl.text.trim().isNotEmpty && _contentCtrl.text.trim().isNotEmpty;
+
+  void _submit() {
+    widget.onSave(CommunityPost(
+      id: DateTime.now().millisecondsSinceEpoch,
+      author: '나', avatar: '😊',
+      curlType: widget.curlType, time: '방금 전',
+      title: _titleCtrl.text.trim(),
+      content: _contentCtrl.text.trim(),
+      likes: 0, comments: 0,
+      tags: _selectedTags.toList(),
+      hasImage: _hasPhoto,
+      postType: _postType,
+    ));
+  }
 
   @override
   Widget build(BuildContext context) {
     return AppBottomSheet(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: EdgeInsets.fromLTRB(20, 8, 20, MediaQuery.of(context).viewInsets.bottom + 24),
         child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text('새 게시글 작성 ✍️',
+          Text('새 게시글 작성',
             style: GoogleFonts.notoSansKr(fontSize: 17, fontWeight: FontWeight.w700, color: AppColors.brown)),
           const SizedBox(height: 16),
-          Row(children: [
-            Container(
-              width: 36, height: 36,
-              decoration: BoxDecoration(color: AppColors.peachLight, shape: BoxShape.circle),
-              child: const Center(child: Text('😊', style: TextStyle(fontSize: 18))),
+
+          // Post type selector
+          Text('글 타입', style: GoogleFonts.notoSansKr(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.brownMid)),
+          const SizedBox(height: 8),
+          Row(children: _postTypes.map((e) {
+            final (key, icon, label) = e;
+            final isSelected = _postType == key;
+            final color = postTypeColor(key);
+            return Expanded(child: Padding(
+              padding: const EdgeInsets.only(right: 6),
+              child: GestureDetector(
+                onTap: () => setState(() { _postType = key; _selectedTags.clear(); }),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  decoration: BoxDecoration(
+                    color: isSelected ? color.withValues(alpha: 0.12) : AppColors.surface,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: isSelected ? color : Colors.transparent, width: 1.5),
+                  ),
+                  child: Column(children: [
+                    Text(icon, style: const TextStyle(fontSize: 18)),
+                    const SizedBox(height: 2),
+                    Text(label, style: GoogleFonts.notoSansKr(
+                      fontSize: 10, fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                      color: isSelected ? color : AppColors.brownMid)),
+                  ]),
+                ),
+              ),
+            ));
+          }).toList()),
+          const SizedBox(height: 16),
+
+          // Title
+          Text('제목', style: GoogleFonts.notoSansKr(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.brownMid)),
+          const SizedBox(height: 6),
+          ListenableBuilder(
+            listenable: _titleCtrl,
+            builder: (_, __) => TextField(
+              controller: _titleCtrl,
+              decoration: const InputDecoration(hintText: '제목을 입력하세요'),
             ),
-            const SizedBox(width: 10),
-            Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('나', style: GoogleFonts.notoSansKr(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.brown)),
-              CurlTypeBadge(widget.curlType),
-            ]),
-          ]),
+          ),
           const SizedBox(height: 14),
-          TextField(
-            controller: _ctrl, maxLines: 5,
-            decoration: const InputDecoration(hintText: '곱슬 케어 팁, 제품 후기, 고민을 자유롭게 나눠봐요! 🌿'),
+
+          // Tags
+          Text('태그 선택', style: GoogleFonts.notoSansKr(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.brownMid)),
+          const SizedBox(height: 8),
+          Wrap(spacing: 6, runSpacing: 6, children: _tagOptions.map((tag) {
+            final isSelected = _selectedTags.contains(tag);
+            return GestureDetector(
+              onTap: () => setState(() {
+                if (isSelected) _selectedTags.remove(tag);
+                else _selectedTags.add(tag);
+              }),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 100),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: isSelected ? AppColors.peach : AppColors.surface,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(tag, style: GoogleFonts.notoSansKr(
+                  fontSize: 12, fontWeight: FontWeight.w600,
+                  color: isSelected ? Colors.white : AppColors.brownMid)),
+              ),
+            );
+          }).toList()),
+          const SizedBox(height: 14),
+
+          // Content
+          Text('내용', style: GoogleFonts.notoSansKr(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.brownMid)),
+          const SizedBox(height: 6),
+          ListenableBuilder(
+            listenable: _contentCtrl,
+            builder: (_, __) => TextField(
+              controller: _contentCtrl, maxLines: 4,
+              decoration: const InputDecoration(hintText: '곱슬 케어 팁, 제품 후기, 고민을 자유롭게 나눠봐요!'),
+            ),
+          ),
+          const SizedBox(height: 14),
+
+          // Photo toggle
+          GestureDetector(
+            onTap: () => setState(() => _hasPhoto = !_hasPhoto),
+            child: Row(children: [
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 150),
+                width: 40, height: 40,
+                decoration: BoxDecoration(
+                  color: _hasPhoto ? AppColors.tealLight : AppColors.surface,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: _hasPhoto ? AppColors.teal : Colors.transparent),
+                ),
+                child: const Center(child: Text('📸', style: TextStyle(fontSize: 20))),
+              ),
+              const SizedBox(width: 10),
+              Text(_hasPhoto ? '사진 첨부됨 (선택)' : '사진 추가 (선택)',
+                style: GoogleFonts.notoSansKr(fontSize: 13, color: _hasPhoto ? AppColors.teal : AppColors.brownLight,
+                  fontWeight: _hasPhoto ? FontWeight.w600 : FontWeight.w400)),
+            ]),
           ),
           const SizedBox(height: 20),
-          Row(children: [
-            Expanded(child: OutlinedButton(
-              onPressed: () => Navigator.pop(context),
-              style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: AppColors.peach),
-                foregroundColor: AppColors.peachDark,
-                shape: const StadiumBorder(),
-                padding: const EdgeInsets.symmetric(vertical: 14),
-              ),
-              child: Text('취소', style: GoogleFonts.notoSansKr(fontWeight: FontWeight.w700)),
-            )),
-            const SizedBox(width: 10),
-            Expanded(flex: 2, child: ListenableBuilder(
-              listenable: _ctrl,
-              builder: (_, __) => ElevatedButton(
-                onPressed: _ctrl.text.trim().isNotEmpty ? () => widget.onSave(CommunityPost(
-                  id: DateTime.now().millisecondsSinceEpoch,
-                  author: '나', avatar: '😊',
-                  curlType: widget.curlType, time: '방금 전',
-                  content: _ctrl.text.trim(), likes: 0, comments: 0, tags: [], hasImage: false,
-                )) : null,
-                child: Text('게시하기 🌸', style: GoogleFonts.notoSansKr(fontWeight: FontWeight.w700, color: Colors.white)),
-              ),
-            )),
-          ]),
+
+          // Buttons
+          ListenableBuilder(
+            listenable: Listenable.merge([_titleCtrl, _contentCtrl]),
+            builder: (_, __) => Row(children: [
+              Expanded(child: OutlinedButton(
+                onPressed: () => Navigator.pop(context),
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: AppColors.peach),
+                  foregroundColor: AppColors.peachDark,
+                  shape: const StadiumBorder(),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+                child: Text('취소', style: GoogleFonts.notoSansKr(fontWeight: FontWeight.w700)),
+              )),
+              const SizedBox(width: 10),
+              Expanded(flex: 2, child: ElevatedButton(
+                onPressed: _canPost ? _submit : null,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: const StadiumBorder(),
+                ),
+                child: Text('게시하기', style: GoogleFonts.notoSansKr(fontWeight: FontWeight.w700, color: Colors.white)),
+              )),
+            ]),
+          ),
         ]),
       ),
     );
