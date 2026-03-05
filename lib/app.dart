@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'theme/app_theme.dart';
 import 'pages/onboarding_page.dart';
 import 'pages/home_page.dart';
@@ -16,8 +15,22 @@ class KkobulangApp extends StatelessWidget {
     return MaterialApp(
       title: '꼬불랑',
       theme: AppTheme.theme,
-      home: const _Root(),
       debugShowCheckedModeBanner: false,
+      // 데스크탑 브라우저에서 폰 크기(390px)로 제한
+      builder: (context, child) {
+        final width = MediaQuery.of(context).size.width;
+        if (width <= 768) return child!;
+        return Container(
+          color: const Color(0xFFE8DDD4),
+          child: Center(
+            child: SizedBox(
+              width: 390,
+              child: ClipRect(child: child!),
+            ),
+          ),
+        );
+      },
+      home: const _Root(),
     );
   }
 }
@@ -29,7 +42,7 @@ class _Root extends StatefulWidget {
 }
 
 class _RootState extends State<_Root> {
-  String? _curlType; // null = onboarding
+  String? _curlType;
   int _tab = 0;
 
   @override
