@@ -1,6 +1,58 @@
-/node_modules
-/dist
-.env*
-/.idx/
-Gemini_Generated_Image_t41x6rt41x6rt41x.png
+# Miscellaneous
+*.class
 *.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+.idx/
+
+# IntelliJ
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# Visual Studio Code
+.vscode/
+
+# Flutter/Dart
+.dart_tool/
+.packages
+.flutter-plugins
+.flutter-plugins-dependencies
+build/
+linux/
+macos/
+windows/
+
+# Android
+.gradle/
+app/src/main/assets/flutter_assets/
+android/app/build/
+android/build/
+android/.gradle/
+android/key.properties
+
+# iOS
+.ios/
+Flutter/App.framework
+Flutter/Flutter.framework
+ios/Flutter/App.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/Generated.xcconfig
+ios/Flutter/app.flx
+ios/Flutter/applookup.bin
+ios/Flutter/flutter_assets/
+ios/Runner/GeneratedPluginRegistrant.h
+ios/Runner/GeneratedPluginRegistrant.m
+ios/Runner/Runner-Bridging-Header.h
+
+# Packages
+pubspec.lock
+
+#ignore prd.md
+prd.md

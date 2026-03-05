@@ -3,34 +3,43 @@ name: Deploy Flutter Web to Cloudflare Pages
 on:
   push:
     branches:
-      - main  # main 브랜치에 푸시될 때 실행
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write
+
     steps:
       # 1. 코드 체크아웃
       - uses: actions/checkout@v4
 
-      # 2. Flutter SDK 설정
+      # 2. Flutter SDK 설정 (stable 최신)
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          flutter-version: '3.29.0' # 현재 가장 안정적인 버전 (수정 가능)
+          cache: true
 
-      # 3. 의존성 설치 및 빌드
-      - name: Build Web
+      # 3. 의존성 설치
+      - name: Get dependencies
+        run: flutter pub get
+
+      # 4. 웹 빌드 (CanvasKit renderer → 한글 폰트 최적화)
+      - name: Build Flutter Web
         run: |
-          flutter pub get
-          flutter build web --release --base-href "/"
+          flutter build web --release \
+            --base-href "/" \
+            --web-renderer canvaskit
 
-      # 4. Cloudflare Pages로 배포
+      # 5. Cloudflare Pages 배포
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/pages-action@v1
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: 'kkobulang' # Cloudflare에 만든 프로젝트 이름으로 수정
-          directory: 'build/web' # 빌드 결과물 경로
+          projectName: 'kkobulang'
+          directory: 'build/web'
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
