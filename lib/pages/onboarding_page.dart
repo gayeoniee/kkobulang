@@ -160,11 +160,9 @@ class _SplashScreenState extends State<_SplashScreen> with SingleTickerProviderS
     child: Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
       ScaleTransition(
         scale: _s,
-        child: Image.asset('assets/kkobulang.png', width: 180),
+        child: Image.asset('assets/kkobulang_logo.png', width: 200),
       ),
       const SizedBox(height: 16),
-      Image.asset('assets/kkobulang_logo.png', width: 130),
-      const SizedBox(height: 8),
       Text('내 곱슬에 맞는 케어를 찾아봐요', style: GoogleFonts.notoSansKr(fontSize: 13, color: AppColors.brownMid)),
     ])),
   );
@@ -189,10 +187,9 @@ class _WelcomeScreen extends StatelessWidget {
       child: SafeArea(child: Padding(
         padding: const EdgeInsets.fromLTRB(28, 24, 28, 0),
         child: Column(children: [
-          Image.asset('assets/kkobulang.png', width: 140),
-          const SizedBox(height: 8),
-          Image.asset('assets/kkobulang_logo.png', width: 110),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
+          Image.asset('assets/kkobulang_logo.png', width: 160),
+          const SizedBox(height: 20),
           Text('한국 곱슬머리를 위한\n케어 정보와 커뮤니티 공간이에요',
             textAlign: TextAlign.center,
             style: GoogleFonts.notoSansKr(fontSize: 14, color: AppColors.brownMid, height: 1.65)),
