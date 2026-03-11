@@ -461,18 +461,14 @@ class _Q1Card extends StatelessWidget {
           boxShadow: [BoxShadow(color: selected ? color.withOpacity(0.2) : const Color(0x123D2B1F), blurRadius: selected ? 10 : 6, offset: const Offset(0, 2))],
         ),
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
-            child: Image.asset(
-              _imagePath!,
+          Image.asset(
+            _imagePath!,
+            height: 90,
+            width: double.infinity,
+            fit: BoxFit.contain,
+            errorBuilder: (_, __, ___) => SizedBox(
               height: 90,
-              width: double.infinity,
-              fit: BoxFit.cover,
-              alignment: Alignment.topCenter,
-              errorBuilder: (_, __, ___) => SizedBox(
-                height: 90,
-                child: Center(child: Text(opt.emoji, style: const TextStyle(fontSize: 30))),
-              ),
+              child: Center(child: Text(opt.emoji, style: const TextStyle(fontSize: 30))),
             ),
           ),
           const SizedBox(height: 4),
@@ -561,7 +557,7 @@ class _ResultScreen extends StatelessWidget {
             width: double.infinity,
             padding: EdgeInsets.fromLTRB(24, MediaQuery.of(context).padding.top + 24, 24, 32),
             decoration: BoxDecoration(
-              gradient: LinearGradient(colors: [typeColor.withOpacity(0.85), typeColor], begin: Alignment.topLeft, end: Alignment.bottomRight),
+              gradient: LinearGradient(colors: [typeColor.withValues(alpha: 0.85), typeColor], begin: Alignment.topLeft, end: Alignment.bottomRight),
             ),
             child: Column(children: [
               Text('이 유형에 가까워요', style: GoogleFonts.notoSansKr(fontSize: 16, color: Colors.white70, fontWeight: FontWeight.w600)),
@@ -569,11 +565,11 @@ class _ResultScreen extends StatelessWidget {
               Text(info.emoji, style: const TextStyle(fontSize: 60)),
               const SizedBox(height: 8),
               Text(info.id, style: GoogleFonts.notoSansKr(fontSize: 48, fontWeight: FontWeight.w900, color: Colors.white)),
-              Text(info.title, style: GoogleFonts.notoSansKr(fontSize: 20, fontWeight: FontWeight.w700, color: Colors.white.withOpacity(0.9))),
+              Text(info.title, style: GoogleFonts.notoSansKr(fontSize: 20, fontWeight: FontWeight.w700, color: Colors.white.withValues(alpha: 0.9))),
               const SizedBox(height: 10),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-                decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(14)),
+                decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(14)),
                 child: Text(info.desc, textAlign: TextAlign.center,
                   style: GoogleFonts.notoSansKr(fontSize: 13, color: Colors.white, height: 1.5)),
               ),
@@ -596,7 +592,7 @@ class _ResultScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(color: typeBg, borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: typeColor.withOpacity(0.3))),
+                  border: Border.all(color: typeColor.withValues(alpha: 0.3))),
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Text('✨ 맞춤 케어 가이드', style: GoogleFonts.notoSansKr(fontSize: 13, fontWeight: FontWeight.w800, color: typeColor)),
                   const SizedBox(height: 8),
@@ -624,7 +620,7 @@ class _ResultScreen extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: typeColor, padding: const EdgeInsets.symmetric(vertical: 17),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    elevation: 4, shadowColor: typeColor.withOpacity(0.4),
+                    elevation: 4, shadowColor: typeColor.withValues(alpha: 0.4),
                   ),
                   child: Text('꼬불랑 시작하기 🌿', style: GoogleFonts.notoSansKr(fontSize: 17, fontWeight: FontWeight.w800, color: Colors.white)),
                 ),
@@ -646,7 +642,7 @@ class _ProfileChip extends StatelessWidget {
   Widget build(BuildContext context) => Expanded(
     child: Container(
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
-      decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(10), border: Border.all(color: color.withOpacity(0.3))),
+      decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10), border: Border.all(color: color.withValues(alpha: 0.3))),
       child: Column(children: [
         Icon(icon, size: 16, color: color),
         const SizedBox(height: 3),
