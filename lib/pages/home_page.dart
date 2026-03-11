@@ -105,10 +105,10 @@ class HomePage extends StatelessWidget {
                   CurlTypeBadge(curlType, large: true),
                 ])),
                 // 이미지 분석 + 이력 버튼
-                Column(mainAxisSize: MainAxisSize.min, children: [
-                  _SmallIconBtn(icon: Icons.camera_alt_rounded, label: '이미지\n분석', onTap: () => _showImageAnalysis(context)),
-                  const SizedBox(height: 4),
-                  _SmallIconBtn(icon: Icons.history_rounded, label: '진단\n이력', onTap: () => _showTypeHistory(context)),
+                Row(mainAxisSize: MainAxisSize.min, children: [
+                  _SmallIconBtn(icon: Icons.camera_alt_rounded, label: '이미지분석', onTap: () => _showImageAnalysis(context)),
+                  const SizedBox(width: 6),
+                  _SmallIconBtn(icon: Icons.history_rounded, label: '진단이력', onTap: () => _showTypeHistory(context)),
                 ]),
               ]),
               const SizedBox(height: 12),

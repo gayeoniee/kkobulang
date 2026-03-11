@@ -207,14 +207,14 @@ class _ProfilePageState extends State<ProfilePage> {
                   CurlTypeBadge(widget.curlType, large: true),
                 ])),
                 // 이미지 분석 + 이력 버튼
-                Column(mainAxisSize: MainAxisSize.min, children: [
+                Row(mainAxisSize: MainAxisSize.min, children: [
                   _ProfileIconBtn(
-                    icon: Icons.camera_alt_rounded, label: '이미지\n분석',
+                    icon: Icons.camera_alt_rounded, label: '이미지분석',
                     onTap: () => _showImageAnalysis(context),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(width: 6),
                   _ProfileIconBtn(
-                    icon: Icons.history_rounded, label: '진단\n이력',
+                    icon: Icons.history_rounded, label: '진단이력',
                     onTap: () => _showTypeHistory(context),
                   ),
                 ]),

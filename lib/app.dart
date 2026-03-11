@@ -60,12 +60,21 @@ class _RootState extends State<_Root> {
     if (_tutorialStep < 4) {
       setState(() {
         _tutorialStep++;
-        _tab = _tutorialStep; // 각 단계에서 해당 탭으로 이동
+        _tab = _tutorialStep;
       });
     } else {
       setState(() {
         _showTutorial = false;
         _tab = 0;
+      });
+    }
+  }
+
+  void _prevTutorial() {
+    if (_tutorialStep > 0) {
+      setState(() {
+        _tutorialStep--;
+        _tab = _tutorialStep;
       });
     }
   }
@@ -124,6 +133,7 @@ class _RootState extends State<_Root> {
           _TutorialOverlay(
             step: _tutorialStep,
             onNext: _nextTutorial,
+            onPrev: _prevTutorial,
             onSkip: _skipTutorial,
           ),
       ],
@@ -168,19 +178,29 @@ const _tutorialSteps = [
 class _TutorialOverlay extends StatelessWidget {
   final int step;
   final VoidCallback onNext;
+  final VoidCallback onPrev;
   final VoidCallback onSkip;
-  const _TutorialOverlay({required this.step, required this.onNext, required this.onSkip});
+  const _TutorialOverlay({required this.step, required this.onNext, required this.onPrev, required this.onSkip});
 
   @override
   Widget build(BuildContext context) {
     final s = _tutorialSteps[step];
     final isLast = step == _tutorialSteps.length - 1;
-    final screenH = MediaQuery.of(context).size.height;
-    final screenW = MediaQuery.of(context).size.width;
-    // 하단 네비바 높이 (약 60px) + safe area
-    const navBarH = 60.0;
-    final itemW = screenW / 5;
-    final navItemX = itemW * step + itemW / 2;
+    final isFirst = step == 0;
+    final mq = MediaQuery.of(context);
+    final screenH = mq.size.height;
+    final screenW = mq.size.width;
+    final safeBottom = mq.padding.bottom;
+    // 실제 네비바 높이 + safe area
+    const navBarContentH = kBottomNavigationBarHeight; // 56
+    final totalNavH = navBarContentH + safeBottom;
+    // 아이콘은 safe area 위 navBar 영역 중앙
+    final navItemY = screenH - safeBottom - navBarContentH / 2;
+    // 웹에서 390px 제한 시 실제 콘텐츠 폭과 오프셋 계산
+    final effectiveW = screenW > 768 ? 390.0 : screenW;
+    final offsetX = screenW > 768 ? (screenW - 390) / 2 : 0.0;
+    final itemW = effectiveW / 5;
+    final navItemX = offsetX + itemW * step + itemW / 2;
 
     return Stack(
       children: [
@@ -191,7 +211,7 @@ class _TutorialOverlay extends StatelessWidget {
             child: CustomPaint(
               painter: _SpotlightPainter(
                 navItemX: navItemX,
-                navItemY: screenH - navBarH / 2,
+                navItemY: navItemY,
                 radius: 34,
               ),
             ),
@@ -200,7 +220,7 @@ class _TutorialOverlay extends StatelessWidget {
         // 말풍선 카드 (네비바 위에 위치)
         Positioned(
           left: 16, right: 16,
-          bottom: navBarH + 16,
+          bottom: totalNavH + 16,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -243,6 +263,20 @@ class _TutorialOverlay extends StatelessWidget {
                       ),
                     ))),
                     const Spacer(),
+                    if (!isFirst) ...[
+                      OutlinedButton(
+                        onPressed: onPrev,
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: AppColors.peach),
+                          foregroundColor: AppColors.peach,
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: Text('← 이전',
+                          style: GoogleFonts.notoSansKr(fontSize: 13, fontWeight: FontWeight.w700)),
+                      ),
+                      const SizedBox(width: 8),
+                    ],
                     ElevatedButton(
                       onPressed: onNext,
                       style: ElevatedButton.styleFrom(

@@ -269,9 +269,8 @@ class _SalonViewState extends State<_SalonView> {
             child: Stack(
               children: [
                 // 지도 배경
-                CustomPaint(
-                  size: const Size(double.infinity, 220),
-                  painter: _FakeMapPainter(),
+                Positioned.fill(
+                  child: CustomPaint(painter: _FakeMapPainter()),
                 ),
                 // 현위치 핀
                 const Positioned(
