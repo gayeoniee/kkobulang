@@ -10,7 +10,8 @@ class _Q {
   final List<_Opt> options;
   final bool multi;
   final int? maxSel;
-  const _Q(this.stage, this.question, this.options, {this.multi = false, this.maxSel});
+  final String? description;
+  const _Q(this.stage, this.question, this.options, {this.multi = false, this.maxSel, this.description});
 }
 class _Opt {
   final String id, label, emoji;
@@ -18,7 +19,7 @@ class _Opt {
   const _Opt(this.id, this.label, this.emoji, {this.sub});
 }
 
-// 9 survey questions
+// 8 survey questions (Q6 탄력성 제거됨)
 final _questions = [
   _Q('단계 1 · 시각적 분류', '샴푸 후 제품 없이 자연 건조했을 때,\n내 머리카락은 어떤 모습인가요?', [
     _Opt('2A','2A 느슨한 웨이브','〰️', sub:'거의 직선에 가깝고 살짝 굴곡'),
@@ -35,26 +36,26 @@ final _questions = [
     _Opt('root','뿌리부터 바로 구불거림','⬆️'),
     _Opt('mid','눈 높이 정도부터 시작됨','👁️'),
     _Opt('end','끝부분만 살짝 휘어짐','⬇️'),
+    _Opt('unknown','모르겠음','🤷'),
   ]),
   _Q('단계 1 · 시각적 분류', '마른 상태에서 브러시질을 하면\n어떻게 되나요?', [
     _Opt('neat','차분하게 정돈됨','✅'),
     _Opt('puff','약간 부풀어 오름','💨'),
     _Opt('lion','사자 갈기처럼 엄청나게 부풀어 오름','🦁'),
+    _Opt('unknown','모르겠음','🤷'),
   ]),
   _Q('단계 2 · 물리적 특성', '[다공성 진단] 마른 머리에 물을 뿌렸을 때\n어떻게 반응하나요?', [
     _Opt('low','표면에 송골송골 맺혀 한참 뒤에 흡수됨','🔴', sub:'저다공성'),
     _Opt('mid','잠시 맺혔다가 천천히 스며듦','🟡', sub:'중다공성'),
     _Opt('high','뿌리자마자 즉시 스며들어 흔적이 사라짐','🟢', sub:'고다공성'),
-  ]),
+    _Opt('unknown','모르겠음','🤷'),
+  ],
+  description: '공극률이란? 모발 공극률은 머리카락 표면의 덮개(큐티클)가 얼마나 벌어져 있는지에 따라 수분을 빨아들이고 내뱉는 정도를 말해요.'),
   _Q('단계 2 · 물리적 특성', '[굵기 진단] 머리카락 한 가닥을\n손가락 사이에 굴렸을 때 느낌은?', [
     _Opt('fine','거의 느껴지지 않거나 매우 가늚','🪶', sub:'Fine'),
     _Opt('medium','실처럼 적당히 느껴짐','🧵', sub:'Medium'),
     _Opt('coarse','치실처럼 뚜렷하게 느껴짐','🪢', sub:'Coarse'),
-  ]),
-  _Q('단계 2 · 물리적 특성', '[탄력성 진단] 젖은 머리카락을\n천천히 당겨보면 어떻게 되나요?', [
-    _Opt('break','조금 당겨지다 바로 툭 끊어짐','❌', sub:'단백질 부족'),
-    _Opt('no_return','늘어났다가 돌아오지 않음','⚠️', sub:'수분 과다'),
-    _Opt('good','적당히 늘어났다 원래 모양으로 돌아옴','✅', sub:'균형 잡힌 상태'),
+    _Opt('unknown','모르겠음','🤷'),
   ]),
   _Q('단계 3 · 과거 이력', '최근 2년 동안 받은 시술을\n모두 선택해 주세요.', [
     _Opt('magic','매직 스트레이트','💈'),
@@ -69,11 +70,13 @@ final _questions = [
     _Opt('volume','머리숱 많아 보이기','💇'),
     _Opt('tangle','엉킴 해결','🪥'),
     _Opt('shine','윤기 부여','💎'),
+    _Opt('unknown','모르겠음','🤷'),
   ], multi: true, maxSel: 2),
   _Q('단계 4 · 관리 목표', '스타일링 제품이 마른 후의 느낌은\n어떤 것을 선호하시나요?', [
     _Opt('soft','바른 듯 안 바른 듯 부드러운 느낌','☁️', sub:'Soft Hold'),
     _Opt('medium','모양이 흐트러지지 않는 적당한 고정력','🌿', sub:'Medium Hold'),
     _Opt('strong','딱딱하더라도 컬이 하루 종일 유지','🔒', sub:'Strong Hold'),
+    _Opt('unknown','모르겠음','🤷'),
   ]),
 ];
 
@@ -86,8 +89,10 @@ class OnboardingPage extends StatefulWidget {
 }
 
 class _OnboardingPageState extends State<OnboardingPage> {
-  int _step = 0; // 0=splash,1=welcome,2-10=survey Q1-9,11=result
+  // 0=splash, 1=welcome, 2=gender, 3-10=survey Q0-Q7, 11=result
+  int _step = 0;
   final Map<int, dynamic> _ans = {};
+  String? _gender;
 
   @override
   void initState() {
@@ -108,8 +113,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
   }
 
   bool _canProceed() {
-    if (_step == 0 || _step == 1) return true;
-    final qi = _step - 2;
+    if (_step <= 2) return true;
+    final qi = _step - 3;
     if (qi < 0 || qi >= _questions.length) return true;
     final ans = _ans[qi];
     if (ans == null) return false;
@@ -126,15 +131,16 @@ class _OnboardingPageState extends State<OnboardingPage> {
         child: switch (_step) {
           0 => const _SplashScreen(key: ValueKey('splash')),
           1 => _WelcomeScreen(key: const ValueKey('welcome'), onNext: () => setState(() => _step = 2)),
+          2 => _GenderScreen(key: const ValueKey('gender'), onSelect: (g) { setState(() { _gender = g; _step = 3; }); }),
           11 => _ResultScreen(key: const ValueKey('result'), curlType: _curlType, answers: _ans, onComplete: widget.onComplete),
           _ => _SurveyScreen(
               key: ValueKey(_step),
-              question: _questions[_step - 2],
-              qIndex: _step - 2,
+              question: _questions[_step - 3],
+              qIndex: _step - 3,
               totalQ: _questions.length,
-              answer: _ans[_step - 2],
+              answer: _ans[_step - 3],
               canProceed: _canProceed(),
-              onAnswer: (val) => setState(() => _ans[_step - 2] = val),
+              onAnswer: (val) => setState(() => _ans[_step - 3] = val),
               onNext: _canProceed() ? _next : null,
               onBack: () => setState(() => _step--),
             ),
@@ -194,7 +200,6 @@ class _WelcomeScreen extends StatelessWidget {
             textAlign: TextAlign.center,
             style: GoogleFonts.notoSansKr(fontSize: 14, color: AppColors.brownMid, height: 1.65)),
           const SizedBox(height: 28),
-          // 3 feature blocks
           Row(children: blocks.map((b) {
             final (icon, label) = b;
             return Expanded(child: Container(
@@ -239,6 +244,71 @@ class _WelcomeScreen extends StatelessWidget {
   }
 }
 
+// ── Gender Selection ──────────────────────────────────────────────────────
+class _GenderScreen extends StatelessWidget {
+  final void Function(String) onSelect;
+  const _GenderScreen({super.key, required this.onSelect});
+
+  @override
+  Widget build(BuildContext context) => Container(
+    decoration: const BoxDecoration(gradient: LinearGradient(
+      begin: Alignment.topCenter, end: Alignment.bottomCenter,
+      colors: [AppColors.cream, AppColors.peachLight])),
+    child: SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(28, 0, 28, 40),
+        child: Column(children: [
+          const SizedBox(height: 40),
+          Image.asset('assets/kkobulang_logo.png', width: 120),
+          const SizedBox(height: 32),
+          Text('어떤 분이세요?',
+            style: GoogleFonts.notoSansKr(fontSize: 26, fontWeight: FontWeight.w800, color: AppColors.brown)),
+          const SizedBox(height: 8),
+          Text('맞춤형 케어 정보를 제공해드릴게요',
+            style: GoogleFonts.notoSansKr(fontSize: 14, color: AppColors.brownMid)),
+          const SizedBox(height: 48),
+          Row(children: [
+            _GenderCard('female', '여자', '💁‍♀️', '꼬불랑 언니', onSelect),
+            const SizedBox(width: 16),
+            _GenderCard('male', '남자', '💁‍♂️', '꼬불랑 형', onSelect),
+          ]),
+          const Spacer(),
+          Text('나중에 프로필에서 변경할 수 있어요',
+            style: GoogleFonts.notoSansKr(fontSize: 11, color: AppColors.brownLight)),
+        ]),
+      ),
+    ),
+  );
+}
+
+class _GenderCard extends StatelessWidget {
+  final String value, label, emoji, sub;
+  final void Function(String) onSelect;
+  const _GenderCard(this.value, this.label, this.emoji, this.sub, this.onSelect);
+
+  @override
+  Widget build(BuildContext context) => Expanded(
+    child: GestureDetector(
+      onTap: () => onSelect(value),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 36),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: const [BoxShadow(color: Color(0x183D2B1F), blurRadius: 12, offset: Offset(0, 4))],
+        ),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Text(emoji, style: const TextStyle(fontSize: 52)),
+          const SizedBox(height: 14),
+          Text(label, style: GoogleFonts.notoSansKr(fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.brown)),
+          const SizedBox(height: 4),
+          Text(sub, style: GoogleFonts.notoSansKr(fontSize: 12, color: AppColors.brownLight)),
+        ]),
+      ),
+    ),
+  );
+}
+
 // ── Survey Screen ─────────────────────────────────────────────────────────
 class _SurveyScreen extends StatelessWidget {
   final _Q question;
@@ -260,11 +330,11 @@ class _SurveyScreen extends StatelessWidget {
       final list = List<String>.from(answer ?? []);
       if (list.contains(id)) {
         list.remove(id);
-        // If 'none' selected, clear others
       } else {
         if (question.maxSel != null && list.length >= question.maxSel!) return;
-        if (id == 'none') { onAnswer(['none']); return; }
+        if (id == 'none' || id == 'unknown') { onAnswer([id]); return; }
         list.remove('none');
+        list.remove('unknown');
         list.add(id);
       }
       onAnswer(list);
@@ -309,6 +379,18 @@ class _SurveyScreen extends StatelessWidget {
                 Text(question.maxSel != null ? '최대 ${question.maxSel}개 선택 가능' : '여러 개 선택 가능',
                   style: GoogleFonts.notoSansKr(fontSize: 12, color: AppColors.brownLight)),
               ],
+              if (question.description != null) ...[
+                const SizedBox(height: 10),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(color: AppColors.tealLight, borderRadius: BorderRadius.circular(10)),
+                  child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    const Text('💡 ', style: TextStyle(fontSize: 11)),
+                    Expanded(child: Text(question.description!,
+                      style: GoogleFonts.notoSansKr(fontSize: 11, color: AppColors.tealDark, height: 1.5))),
+                  ]),
+                ),
+              ],
             ]),
           ),
         ])),
@@ -339,7 +421,7 @@ class _SurveyScreen extends StatelessWidget {
                 disabledBackgroundColor: AppColors.brownLight.withOpacity(0.25),
                 disabledForegroundColor: Colors.white,
               ),
-              child: Text(qIndex < totalQ - 1 ? '다음으로 →' : '분석 완료 ✨',
+              child: Text(qIndex < totalQ - 1 ? '다음으로 →' : '결과 보기 ✨',
                 style: GoogleFonts.notoSansKr(fontSize: 16, fontWeight: FontWeight.w800, color: Colors.white)),
             ),
           ),
@@ -427,12 +509,13 @@ class _ResultScreen extends StatelessWidget {
       _ => '중다공성',
     };
   }
-  String _thicknessLabel() => switch (answers[4] as String? ?? 'medium') { 'fine' => '가는 모발', 'coarse' => '굵은 모발', _ => '보통 굵기' };
-  String _elasticityLabel() => switch (answers[5] as String? ?? 'good') { 'break' => '단백질 보충 필요', 'no_return' => '수분 밸런스 필요', _ => '균형 잡힌 상태' };
+  String _thicknessLabel() => switch (answers[4] as String? ?? 'medium') {
+    'fine' => '가는 모발',
+    'coarse' => '굵은 모발',
+    _ => '보통 굵기',
+  };
   String _careApproach() {
     final p = answers[3] as String? ?? 'mid';
-    final e = answers[5] as String? ?? 'good';
-    if (e == 'break') return '단백질 트리트먼트를 격주로 사용하세요. 달걀·케라틴 성분의 마스크팩이 효과적이에요.';
     if (p == 'low') return '저다공성 모발은 열로 큐티클을 열어야 해요. 따뜻한 물로 헹구고 스팀 트리트먼트를 추천해요.';
     if (p == 'high') return '고다공성 모발엔 단백질+보습 레이어링이 핵심이에요. LCO 방법으로 수분을 잡아주세요.';
     return 'LOC 방법(리브인→오일→크림)으로 수분을 층층이 쌓아보세요. 주 1~2회 딥컨디셔닝도 필수예요.';
@@ -455,7 +538,7 @@ class _ResultScreen extends StatelessWidget {
               gradient: LinearGradient(colors: [typeColor.withOpacity(0.85), typeColor], begin: Alignment.topLeft, end: Alignment.bottomRight),
             ),
             child: Column(children: [
-              Text('🎉 분석 완료!', style: GoogleFonts.notoSansKr(fontSize: 16, color: Colors.white70, fontWeight: FontWeight.w600)),
+              Text('이 유형에 가까워요', style: GoogleFonts.notoSansKr(fontSize: 16, color: Colors.white70, fontWeight: FontWeight.w600)),
               const SizedBox(height: 12),
               Text(info.emoji, style: const TextStyle(fontSize: 60)),
               const SizedBox(height: 8),
@@ -473,15 +556,13 @@ class _ResultScreen extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              // Profile
+              // Profile chips
               Text('내 모발 프로필', style: GoogleFonts.notoSansKr(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.brown)),
               const SizedBox(height: 10),
               Row(children: [
                 _ProfileChip(_porosityLabel(), Icons.water_drop_rounded, AppColors.teal),
                 const SizedBox(width: 8),
                 _ProfileChip(_thicknessLabel(), Icons.straighten_rounded, AppColors.peach),
-                const SizedBox(width: 8),
-                _ProfileChip(_elasticityLabel(), Icons.fitness_center_rounded, AppColors.green),
               ]),
               const SizedBox(height: 20),
 

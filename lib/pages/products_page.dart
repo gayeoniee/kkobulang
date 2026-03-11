@@ -213,14 +213,14 @@ class _ProductDetailPageState extends State<_ProductDetailPage> with SingleTicke
             indicatorWeight: 2.5,
             labelStyle: GoogleFonts.notoSansKr(fontSize: 14, fontWeight: FontWeight.w700),
             unselectedLabelStyle: GoogleFonts.notoSansKr(fontSize: 14, fontWeight: FontWeight.w500),
-            tabs: const [Tab(text: '제품 상세'), Tab(text: '리뷰 · 성분')],
+            tabs: const [Tab(text: '상세/성분'), Tab(text: '리뷰')],
           ),
         ),
 
         Expanded(
           child: TabBarView(controller: _tab, children: [
-            _DetailTab(product: p, curlType: widget.curlType),
-            _ReviewIngredientTab(product: p),
+            _IngredientDetailTab(product: p, curlType: widget.curlType),
+            _ReviewTab(product: p),
           ]),
         ),
       ]),
@@ -228,13 +228,34 @@ class _ProductDetailPageState extends State<_ProductDetailPage> with SingleTicke
   }
 }
 
-class _DetailTab extends StatelessWidget {
+// ── 상세/성분 탭: 성분 먼저, 그 다음 상세 ──────────────────────────────────
+class _IngredientDetailTab extends StatelessWidget {
   final Product product; final String curlType;
-  const _DetailTab({required this.product, required this.curlType});
+  const _IngredientDetailTab({required this.product, required this.curlType});
+
   @override
   Widget build(BuildContext context) => SingleChildScrollView(
     padding: const EdgeInsets.fromLTRB(20, 16, 20, 80),
     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      // 성분 먼저
+      Text('주요 성분', style: GoogleFonts.notoSansKr(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.brown)),
+      const SizedBox(height: 10),
+      AppCard(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        _IngredientRow('수분 공급', '히알루론산, 알로에베라', Icons.water_drop_rounded, AppColors.teal),
+        const Divider(color: AppColors.surface),
+        _IngredientRow('단백질 강화', '케라틴, 실크아미노산', Icons.fitness_center_rounded, AppColors.peach),
+        const Divider(color: AppColors.surface),
+        _IngredientRow('컬 정의', '글리세린, 판테놀', Icons.auto_awesome_rounded, AppColors.green),
+        const Divider(color: AppColors.surface),
+        Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Text('전성분: 정제수, 세틸알코올, 히알루론산나트륨, 케라틴, 실크아미노산, 글리세린, 판테놀, 향료, 방부제...',
+            style: GoogleFonts.notoSansKr(fontSize: 11, color: AppColors.brownLight, height: 1.5)),
+        ),
+      ])),
+      const SizedBox(height: 20),
+
+      // 그 다음 상세 정보
       Text('제품 설명', style: GoogleFonts.notoSansKr(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.brown)),
       const SizedBox(height: 8),
       Text(product.desc, style: GoogleFonts.notoSansKr(fontSize: 14, color: AppColors.brownMid, height: 1.7)),
@@ -257,9 +278,10 @@ class _DetailTab extends StatelessWidget {
   );
 }
 
-class _ReviewIngredientTab extends StatelessWidget {
+// ── 리뷰 탭 ─────────────────────────────────────────────────────────────────
+class _ReviewTab extends StatelessWidget {
   final Product product;
-  const _ReviewIngredientTab({required this.product});
+  const _ReviewTab({required this.product});
 
   static const _sampleReviews = [
     ('수진이', '3B', 4.5, '진짜 대박이에요! 습도가 높아도 컬이 무너지지 않아요. 재구매 예정입니다 ✨'),
@@ -271,7 +293,6 @@ class _ReviewIngredientTab extends StatelessWidget {
   Widget build(BuildContext context) => SingleChildScrollView(
     padding: const EdgeInsets.fromLTRB(20, 16, 20, 80),
     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      // Rating summary
       AppCard(child: Column(children: [
         Row(children: [
           Column(children: [
@@ -298,7 +319,6 @@ class _ReviewIngredientTab extends StatelessWidget {
         ]),
       ])),
       const SizedBox(height: 16),
-
       Text('최신 리뷰', style: GoogleFonts.notoSansKr(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.brown)),
       const SizedBox(height: 10),
       ..._sampleReviews.map((r) {
@@ -307,7 +327,7 @@ class _ReviewIngredientTab extends StatelessWidget {
           padding: const EdgeInsets.only(bottom: 10),
           child: AppCard(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Row(children: [
-              Container(width: 32, height: 32, decoration: BoxDecoration(color: AppColors.peachLight, shape: BoxShape.circle),
+              Container(width: 32, height: 32, decoration: const BoxDecoration(color: AppColors.peachLight, shape: BoxShape.circle),
                 child: Center(child: Text(author[0], style: GoogleFonts.notoSansKr(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.peachDark)))),
               const SizedBox(width: 8),
               Text(author, style: GoogleFonts.notoSansKr(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.brown)),
@@ -321,23 +341,6 @@ class _ReviewIngredientTab extends StatelessWidget {
           ])),
         );
       }),
-      const SizedBox(height: 16),
-
-      Text('주요 성분', style: GoogleFonts.notoSansKr(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.brown)),
-      const SizedBox(height: 10),
-      AppCard(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        _IngredientRow('수분 공급', '히알루론산, 알로에베라', Icons.water_drop_rounded, AppColors.teal),
-        const Divider(color: AppColors.surface),
-        _IngredientRow('단백질 강화', '케라틴, 실크아미노산', Icons.fitness_center_rounded, AppColors.peach),
-        const Divider(color: AppColors.surface),
-        _IngredientRow('컬 정의', '글리세린, 판테놀', Icons.auto_awesome_rounded, AppColors.green),
-        const Divider(color: AppColors.surface),
-        Padding(
-          padding: const EdgeInsets.only(top: 8),
-          child: Text('전성분: 정제수, 세틸알코올, 히알루론산나트륨, 케라틴, 실크아미노산, 글리세린, 판테놀, 향료, 방부제...',
-            style: GoogleFonts.notoSansKr(fontSize: 11, color: AppColors.brownLight, height: 1.5)),
-        ),
-      ])),
     ]),
   );
 }

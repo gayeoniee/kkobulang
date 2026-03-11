@@ -8,7 +8,22 @@ import '../widgets/common_widgets.dart';
 const _curlStateEmojis = ['😞','😕','😐','😊','🥰'];
 const _curlStateLabels = ['최악','별로','보통','좋음','완벽'];
 const _routinePresets = ['샴푸','컨디셔너','딥컨디셔닝','리브인컨디셔너','컬크림','젤','무스','오일','디퓨저건조','자연건조','스크런칭'];
-const _badges = [('🌱','첫 기록',true),('🔥','3일 연속',true),('💫','7일 연속',false),('🏆','30일 달성',false)];
+
+String _seasonLabel(int month) {
+  if (month >= 3 && month <= 5) return '🌸 봄';
+  if (month >= 6 && month <= 8) return '☀️ 여름';
+  if (month >= 9 && month <= 11) return '🍂 가을';
+  return '❄️ 겨울';
+}
+
+String _seasonKey(int month) {
+  if (month >= 3 && month <= 5) return 'spring';
+  if (month >= 6 && month <= 8) return 'summer';
+  if (month >= 9 && month <= 11) return 'autumn';
+  return 'winter';
+}
+
+const _seasonOrder = ['spring', 'summer', 'autumn', 'winter'];
 
 class DiaryPage extends StatefulWidget {
   const DiaryPage({super.key});
@@ -21,65 +36,82 @@ class _DiaryPageState extends State<DiaryPage> {
 
   void _openForm() => showModalBottomSheet(
     context: context, isScrollControlled: true, backgroundColor: Colors.transparent,
-    builder: (_) => _DiaryForm(onSave: (e) { setState(() => _entries.insert(0, e)); Navigator.pop(context); }),
+    builder: (_) => _DiaryForm(
+      onSave: (e) { setState(() => _entries.insert(0, e)); Navigator.pop(context); },
+      lastEntry: _entries.isNotEmpty ? _entries.first : null,
+    ),
   );
 
-  @override
-  Widget build(BuildContext context) => Scaffold(
-    backgroundColor: AppColors.cream,
-    appBar: AppBar(
-      title: const Text('헤어 다이어리'),
-      actions: [Padding(padding: const EdgeInsets.only(right: 12),
-        child: ElevatedButton(onPressed: _openForm,
-          style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-            textStyle: GoogleFonts.notoSansKr(fontSize: 13, fontWeight: FontWeight.w700)),
-          child: const Text('+ 기록하기')))],
-    ),
-    body: SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        // Stats
-        Row(children: [
-          _StatBox(label: '총 기록', value: '${_entries.length}일', bg: AppColors.peachLight, color: AppColors.peachDark),
-          const SizedBox(width: 10),
-          const _StatBox(label: '이번 달', value: '2회', bg: AppColors.tealLight, color: AppColors.tealDark),
-          const SizedBox(width: 10),
-          const _StatBox(label: '연속 기록', value: '3일', bg: AppColors.greenLight, color: Color(0xFF4A9E44)),
-        ]),
-        const SizedBox(height: 18),
+  Map<String, List<DiaryEntry>> get _bySeason {
+    final map = <String, List<DiaryEntry>>{};
+    for (final e in _entries) {
+      final key = _seasonKey(e.date.month);
+      map.putIfAbsent(key, () => []).add(e);
+    }
+    return map;
+  }
 
-        // Badges
-        Text('🏅 획득한 뱃지', style: GoogleFonts.notoSansKr(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.brown)),
-        const SizedBox(height: 10),
-        Row(children: _badges.map((b) {
-          final (icon, label, earned) = b;
-          return Expanded(child: Opacity(opacity: earned ? 1.0 : 0.4,
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 3),
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              decoration: BoxDecoration(
-                color: earned ? Colors.white : AppColors.surface, borderRadius: BorderRadius.circular(12),
-                boxShadow: earned ? const [BoxShadow(color: Color(0x143D2B1F), blurRadius: 6, offset: Offset(0,2))] : null),
-              child: Column(children: [
-                Text(icon, style: const TextStyle(fontSize: 22)),
-                const SizedBox(height: 3),
-                Text(label, textAlign: TextAlign.center, style: GoogleFonts.notoSansKr(fontSize: 10, color: AppColors.brownMid)),
-              ]),
-            )));
-        }).toList()),
-        const SizedBox(height: 18),
-        const Divider(color: AppColors.border),
-        const SizedBox(height: 14),
-        Text('최근 기록', style: GoogleFonts.notoSansKr(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.brown)),
-        const SizedBox(height: 12),
-        if (_entries.isEmpty) Center(child: Column(children: [
-          const SizedBox(height: 32), const Text('📓', style: TextStyle(fontSize: 48)),
-          const SizedBox(height: 12),
-          Text('아직 기록이 없어요', style: GoogleFonts.notoSansKr(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.brownMid)),
-        ]))
-        else ..._entries.map((e) => Padding(padding: const EdgeInsets.only(bottom: 12), child: _DiaryCard(entry: e))),
-      ]),
+  @override
+  Widget build(BuildContext context) {
+    final bySeason = _bySeason;
+    return Scaffold(
+      backgroundColor: AppColors.cream,
+      appBar: AppBar(
+        title: const Text('헤어 다이어리'),
+        actions: [Padding(padding: const EdgeInsets.only(right: 12),
+          child: ElevatedButton(onPressed: _openForm,
+            style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              textStyle: GoogleFonts.notoSansKr(fontSize: 13, fontWeight: FontWeight.w700)),
+            child: const Text('+ 기록하기')))],
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          // Stats
+          Row(children: [
+            _StatBox(label: '총 기록', value: '${_entries.length}일', bg: AppColors.peachLight, color: AppColors.peachDark),
+            const SizedBox(width: 10),
+            const _StatBox(label: '이번 달', value: '2회', bg: AppColors.tealLight, color: AppColors.tealDark),
+            const SizedBox(width: 10),
+            const _StatBox(label: '연속 기록', value: '3일', bg: AppColors.greenLight, color: Color(0xFF4A9E44)),
+          ]),
+          const SizedBox(height: 20),
+
+          if (_entries.isEmpty)
+            Center(child: Column(children: [
+              const SizedBox(height: 32), const Text('📓', style: TextStyle(fontSize: 48)),
+              const SizedBox(height: 12),
+              Text('아직 기록이 없어요', style: GoogleFonts.notoSansKr(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.brownMid)),
+            ]))
+          else
+            // 계절별 섹션
+            for (final seasonKey in _seasonOrder)
+              if (bySeason.containsKey(seasonKey)) ...[
+                _SeasonHeader(label: _seasonLabel(bySeason[seasonKey]!.first.date.month)),
+                const SizedBox(height: 10),
+                ...bySeason[seasonKey]!.map((e) => Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: _DiaryCard(entry: e),
+                )),
+                const SizedBox(height: 8),
+              ],
+        ]),
+      ),
+    );
+  }
+}
+
+class _SeasonHeader extends StatelessWidget {
+  final String label;
+  const _SeasonHeader({required this.label});
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+    decoration: BoxDecoration(
+      color: AppColors.surface,
+      borderRadius: BorderRadius.circular(12),
     ),
+    child: Text(label, style: GoogleFonts.notoSansKr(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.brown)),
   );
 }
 
@@ -140,12 +172,13 @@ class _DiaryCard extends StatelessWidget {
 // ── Diary Form ───────────────────────────────────────────────────────────
 class _DiaryForm extends StatefulWidget {
   final void Function(DiaryEntry) onSave;
-  const _DiaryForm({required this.onSave});
+  final DiaryEntry? lastEntry;
+  const _DiaryForm({required this.onSave, this.lastEntry});
   @override State<_DiaryForm> createState() => _DiaryFormState();
 }
 
 class _DiaryFormState extends State<_DiaryForm> {
-  int _curlState = 3; // 1-5
+  int _curlState = 3;
   List<String> _routine = [];
   final List<String> _products = [];
   final TextEditingController _productCtrl = TextEditingController();
@@ -158,6 +191,11 @@ class _DiaryFormState extends State<_DiaryForm> {
   void _addProduct(String name) {
     if (name.trim().isEmpty) return;
     setState(() { _products.add(name.trim()); _productCtrl.clear(); _searchProduct = null; });
+  }
+
+  void _loadLastRoutine() {
+    if (widget.lastEntry == null) return;
+    setState(() => _routine = List.from(widget.lastEntry!.routine));
   }
 
   @override
@@ -173,7 +211,7 @@ class _DiaryFormState extends State<_DiaryForm> {
           Text('오늘의 헤어 기록 ✍️', style: GoogleFonts.notoSansKr(fontSize: 17, fontWeight: FontWeight.w800, color: AppColors.brown)),
           const SizedBox(height: 18),
 
-          // Photo placeholder
+          // Photo
           GestureDetector(
             onTap: () => setState(() => _hasPhoto = !_hasPhoto),
             child: Container(
@@ -215,7 +253,19 @@ class _DiaryFormState extends State<_DiaryForm> {
           const SizedBox(height: 16),
 
           // Routine
-          Text('루틴', style: GoogleFonts.notoSansKr(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.brown)),
+          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+            Text('루틴', style: GoogleFonts.notoSansKr(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.brown)),
+            if (widget.lastEntry != null)
+              GestureDetector(
+                onTap: _loadLastRoutine,
+                child: Row(mainAxisSize: MainAxisSize.min, children: [
+                  const Icon(Icons.autorenew_rounded, size: 13, color: AppColors.teal),
+                  const SizedBox(width: 3),
+                  Text('최근 루틴 자동불러오기',
+                    style: GoogleFonts.notoSansKr(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.teal)),
+                ]),
+              ),
+          ]),
           const SizedBox(height: 8),
           Wrap(spacing: 8, runSpacing: 8,
             children: _routinePresets.map((r) {
@@ -248,7 +298,24 @@ class _DiaryFormState extends State<_DiaryForm> {
           const SizedBox(height: 16),
 
           // Products
-          Text('제품', style: GoogleFonts.notoSansKr(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.brown)),
+          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+            Text('제품', style: GoogleFonts.notoSansKr(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.brown)),
+            if (widget.lastEntry != null)
+              GestureDetector(
+                onTap: () {
+                  // 마지막 기록의 루틴을 제품으로 쓰는 대신, 샘플 최근 제품 불러오기
+                  setState(() {
+                    if (_products.isEmpty) _products.addAll(['컬크림', '리브인컨디셔너']);
+                  });
+                },
+                child: Row(mainAxisSize: MainAxisSize.min, children: [
+                  const Icon(Icons.autorenew_rounded, size: 13, color: AppColors.peach),
+                  const SizedBox(width: 3),
+                  Text('최근 제품 자동불러오기',
+                    style: GoogleFonts.notoSansKr(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.peach)),
+                ]),
+              ),
+          ]),
           const SizedBox(height: 8),
           Row(children: [
             Expanded(child: TextField(
@@ -266,7 +333,6 @@ class _DiaryFormState extends State<_DiaryForm> {
                 child: const Icon(Icons.add_rounded, color: Colors.white, size: 20)),
             ),
           ]),
-          // Search results
           if (filteredProducts.isNotEmpty)
             Container(
               margin: const EdgeInsets.only(top: 4),

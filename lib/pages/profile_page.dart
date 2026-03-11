@@ -44,6 +44,90 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   void dispose() { _nickCtrl.dispose(); _bioCtrl.dispose(); super.dispose(); }
 
+  void _showImageAnalysis(BuildContext context) {
+    showModalBottomSheet(
+      context: context, isScrollControlled: true, backgroundColor: Colors.transparent,
+      builder: (_) => AppBottomSheet(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            Text('📷 이미지로 유형 분석', style: GoogleFonts.notoSansKr(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.brown)),
+            const SizedBox(height: 6),
+            Text('머리 사진으로 곱슬 유형을 분석해요', style: GoogleFonts.notoSansKr(fontSize: 13, color: AppColors.brownLight)),
+            const SizedBox(height: 24),
+            Container(
+              width: double.infinity, height: 180,
+              decoration: BoxDecoration(color: AppColors.peachLight, borderRadius: BorderRadius.circular(16)),
+              child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                const Text('🔬', style: TextStyle(fontSize: 48)),
+                const SizedBox(height: 12),
+                Text('준비 중이에요!', style: GoogleFonts.notoSansKr(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.peachDark)),
+                const SizedBox(height: 6),
+                Text('AI 이미지 분석 기능이\n곧 출시될 예정이에요', textAlign: TextAlign.center,
+                  style: GoogleFonts.notoSansKr(fontSize: 13, color: AppColors.brownMid)),
+              ]),
+            ),
+            const SizedBox(height: 20),
+            buildPrimaryButton('닫기', () => Navigator.pop(context)),
+          ]),
+        ),
+      ),
+    );
+  }
+
+  void _showTypeHistory(BuildContext context) {
+    final typeInfo = curlTypes.firstWhere((t) => t.id == widget.curlType, orElse: () => curlTypes[4]);
+    final typeColor = AppColors.curlTypeColor(widget.curlType);
+    showModalBottomSheet(
+      context: context, isScrollControlled: true, backgroundColor: Colors.transparent,
+      builder: (_) => AppBottomSheet(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text('📋 유형 진단 이력', style: GoogleFonts.notoSansKr(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.brown)),
+            const SizedBox(height: 16),
+            _historyItem(context, date: '2026.03.11', typeId: widget.curlType, title: typeInfo.title, color: typeColor, isCurrent: true),
+            _historyItem(context, date: '2025.11.03', typeId: '3A', title: '느슨한 컬', color: AppColors.curlTypeColor('3A'), isCurrent: false),
+            _historyItem(context, date: '2025.06.15', typeId: '2C', title: '굵은 웨이브', color: AppColors.curlTypeColor('2C'), isCurrent: false),
+            const SizedBox(height: 16),
+            buildPrimaryButton('닫기', () => Navigator.pop(context)),
+          ]),
+        ),
+      ),
+    );
+  }
+
+  Widget _historyItem(BuildContext context, {required String date, required String typeId, required String title, required Color color, required bool isCurrent}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: isCurrent ? color.withOpacity(0.1) : AppColors.surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: isCurrent ? color.withOpacity(0.4) : Colors.transparent, width: 1.5),
+        ),
+        child: Row(children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(color: color.withOpacity(0.15), borderRadius: BorderRadius.circular(8)),
+            child: Text(typeId, style: GoogleFonts.notoSansKr(fontSize: 14, fontWeight: FontWeight.w800, color: color)),
+          ),
+          const SizedBox(width: 10),
+          Expanded(child: Text(title, style: GoogleFonts.notoSansKr(fontSize: 13, color: AppColors.brownMid))),
+          if (isCurrent)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(10)),
+              child: Text('현재', style: GoogleFonts.notoSansKr(fontSize: 10, fontWeight: FontWeight.w700, color: Colors.white)),
+            )
+          else
+            Text(date, style: GoogleFonts.notoSansKr(fontSize: 11, color: AppColors.brownLight)),
+        ]),
+      ),
+    );
+  }
+
   void _openTypeSelector() {
     showModalBottomSheet(
       context: context, isScrollControlled: true,
@@ -122,6 +206,18 @@ class _ProfilePageState extends State<ProfilePage> {
                   const SizedBox(height: 6),
                   CurlTypeBadge(widget.curlType, large: true),
                 ])),
+                // 이미지 분석 + 이력 버튼
+                Column(mainAxisSize: MainAxisSize.min, children: [
+                  _ProfileIconBtn(
+                    icon: Icons.camera_alt_rounded, label: '이미지\n분석',
+                    onTap: () => _showImageAnalysis(context),
+                  ),
+                  const SizedBox(height: 4),
+                  _ProfileIconBtn(
+                    icon: Icons.history_rounded, label: '진단\n이력',
+                    onTap: () => _showTypeHistory(context),
+                  ),
+                ]),
               ]),
               const SizedBox(height: 14),
               if (_editing)
@@ -139,13 +235,6 @@ class _ProfilePageState extends State<ProfilePage> {
                 const SizedBox(height: 14),
                 buildPrimaryButton('저장하기', () => setState(() => _editing = false)),
               ],
-              const SizedBox(height: 14),
-              const Divider(color: AppColors.surface),
-              const SizedBox(height: 12),
-              Row(children: [
-                _StatCol('3', '게시글'),
-                _StatCol('7', '일지'),
-              ]),
             ]),
           ),
           const SizedBox(height: 14),
@@ -223,14 +312,26 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 }
 
-class _StatCol extends StatelessWidget {
-  final String value, label;
-  const _StatCol(this.value, this.label);
+
+class _ProfileIconBtn extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  const _ProfileIconBtn({required this.icon, required this.label, required this.onTap});
   @override
-  Widget build(BuildContext context) => Expanded(child: Column(children: [
-    Text(value, style: GoogleFonts.notoSansKr(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.brown)),
-    Text(label, style: GoogleFonts.notoSansKr(fontSize: 12, color: AppColors.brownLight)),
-  ]));
+  Widget build(BuildContext context) => GestureDetector(
+    onTap: onTap,
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+      decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(8)),
+      child: Column(mainAxisSize: MainAxisSize.min, children: [
+        Icon(icon, size: 16, color: AppColors.teal),
+        const SizedBox(height: 2),
+        Text(label, textAlign: TextAlign.center,
+          style: GoogleFonts.notoSansKr(fontSize: 8, color: AppColors.tealDark, fontWeight: FontWeight.w600)),
+      ]),
+    ),
+  );
 }
 
 class _MenuItem extends StatelessWidget {

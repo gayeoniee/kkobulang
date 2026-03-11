@@ -86,13 +86,6 @@ final List<CommunityPost> pinnedPosts = [
     likes: 0, comments: 0, tags: ['공지'], hasImage: false,
     postType: 'notice', isPinned: true,
   ),
-  CommunityPost(
-    id: -2, author: '꼬불랑 에디터', avatar: '✍️', curlType: '', time: '고정글',
-    title: '내 곱슬 유형 제대로 알기 - 완전 정복 가이드',
-    content: '내 곱슬 유형을 제대로 알면 케어가 달라져요! 2A부터 4C까지 유형별 특징과 추천 루틴을 정리했어요. 온보딩 설문에서 유형을 바꿀 수 있어요.',
-    likes: 128, comments: 34, tags: ['가이드', '곱슬유형', '필독'], hasImage: true,
-    postType: 'guide', isPinned: true,
-  ),
 ];
 
 List<CommunityPost> communityPosts = [
