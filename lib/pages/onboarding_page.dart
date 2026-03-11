@@ -465,11 +465,12 @@ class _Q1Card extends StatelessWidget {
             borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
             child: Image.asset(
               _imagePath!,
-              height: 80,
+              height: 90,
               width: double.infinity,
               fit: BoxFit.cover,
+              alignment: Alignment.topCenter,
               errorBuilder: (_, __, ___) => SizedBox(
-                height: 80,
+                height: 90,
                 child: Center(child: Text(opt.emoji, style: const TextStyle(fontSize: 30))),
               ),
             ),
