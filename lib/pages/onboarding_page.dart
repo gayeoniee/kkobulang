@@ -400,7 +400,7 @@ class _SurveyScreen extends StatelessWidget {
           child: isQ1
             ? GridView.builder(
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3, crossAxisSpacing: 10, mainAxisSpacing: 10, childAspectRatio: 0.6),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3, crossAxisSpacing: 10, mainAxisSpacing: 10, childAspectRatio: 0.55),
                 itemCount: question.options.length,
                 itemBuilder: (_, i) => _Q1Card(opt: question.options[i], selected: _isSelected(question.options[i].id), gender: gender, onTap: () => _toggle(question.options[i].id)),
               )
@@ -461,18 +461,14 @@ class _Q1Card extends StatelessWidget {
           boxShadow: [BoxShadow(color: selected ? color.withOpacity(0.2) : const Color(0x123D2B1F), blurRadius: selected ? 10 : 6, offset: const Offset(0, 2))],
         ),
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
-            child: Image.asset(
-              _imagePath!,
-              height: 160,
-              width: double.infinity,
-              fit: BoxFit.cover,
-              alignment: Alignment.topCenter,
-              errorBuilder: (_, __, ___) => SizedBox(
-                height: 160,
-                child: Center(child: Text(opt.emoji, style: const TextStyle(fontSize: 30))),
-              ),
+          Image.asset(
+            _imagePath!,
+            height: 150,
+            width: double.infinity,
+            fit: BoxFit.contain,
+            errorBuilder: (_, __, ___) => SizedBox(
+              height: 150,
+              child: Center(child: Text(opt.emoji, style: const TextStyle(fontSize: 30))),
             ),
           ),
           const SizedBox(height: 4),
