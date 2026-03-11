@@ -140,6 +140,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
               totalQ: _questions.length,
               answer: _ans[_step - 3],
               canProceed: _canProceed(),
+              gender: _gender,
               onAnswer: (val) => setState(() => _ans[_step - 3] = val),
               onNext: _canProceed() ? _next : null,
               onBack: () => setState(() => _step--),
@@ -315,9 +316,10 @@ class _SurveyScreen extends StatelessWidget {
   final int qIndex, totalQ;
   final dynamic answer;
   final bool canProceed;
+  final String? gender;
   final void Function(dynamic) onAnswer;
   final VoidCallback? onNext, onBack;
-  const _SurveyScreen({super.key, required this.question, required this.qIndex, required this.totalQ, required this.answer, required this.canProceed, required this.onAnswer, this.onNext, this.onBack});
+  const _SurveyScreen({super.key, required this.question, required this.qIndex, required this.totalQ, required this.answer, required this.canProceed, this.gender, required this.onAnswer, this.onNext, this.onBack});
 
   bool _isSelected(String id) {
     if (answer == null) return false;
@@ -398,9 +400,9 @@ class _SurveyScreen extends StatelessWidget {
           child: isQ1
             ? GridView.builder(
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3, crossAxisSpacing: 10, mainAxisSpacing: 10, childAspectRatio: 0.9),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3, crossAxisSpacing: 10, mainAxisSpacing: 10, childAspectRatio: 0.85),
                 itemCount: question.options.length,
-                itemBuilder: (_, i) => _Q1Card(opt: question.options[i], selected: _isSelected(question.options[i].id), onTap: () => _toggle(question.options[i].id)),
+                itemBuilder: (_, i) => _Q1Card(opt: question.options[i], selected: _isSelected(question.options[i].id), gender: gender, onTap: () => _toggle(question.options[i].id)),
               )
             : ListView.separated(
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
@@ -434,8 +436,15 @@ class _SurveyScreen extends StatelessWidget {
 class _Q1Card extends StatelessWidget {
   final _Opt opt;
   final bool selected;
+  final String? gender;
   final VoidCallback onTap;
-  const _Q1Card({required this.opt, required this.selected, required this.onTap});
+  const _Q1Card({required this.opt, required this.selected, this.gender, required this.onTap});
+
+  String? get _imagePath {
+    final prefix = (gender == 'male') ? 'm' : 'f';
+    final typeKey = opt.id.toLowerCase(); // e.g. '3b'
+    return 'assets/$prefix$typeKey.png';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -452,12 +461,28 @@ class _Q1Card extends StatelessWidget {
           boxShadow: [BoxShadow(color: selected ? color.withOpacity(0.2) : const Color(0x123D2B1F), blurRadius: selected ? 10 : 6, offset: const Offset(0, 2))],
         ),
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Text(opt.emoji, style: const TextStyle(fontSize: 26)),
+          ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
+            child: Image.asset(
+              _imagePath!,
+              height: 80,
+              width: double.infinity,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => SizedBox(
+                height: 80,
+                child: Center(child: Text(opt.emoji, style: const TextStyle(fontSize: 30))),
+              ),
+            ),
+          ),
           const SizedBox(height: 4),
-          Text(opt.id, style: GoogleFonts.notoSansKr(fontSize: 14, fontWeight: FontWeight.w800, color: selected ? color : AppColors.brown)),
-          Text(opt.label.replaceFirst('${opt.id} ', ''), textAlign: TextAlign.center,
-            style: GoogleFonts.notoSansKr(fontSize: 9, color: AppColors.brownMid, height: 1.3)),
-          if (selected) Icon(Icons.check_circle_rounded, color: color, size: 14),
+          Text(opt.id, style: GoogleFonts.notoSansKr(fontSize: 13, fontWeight: FontWeight.w800, color: selected ? color : AppColors.brown)),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: Text(opt.label.replaceFirst('${opt.id} ', ''), textAlign: TextAlign.center,
+              style: GoogleFonts.notoSansKr(fontSize: 8, color: AppColors.brownMid, height: 1.3)),
+          ),
+          if (selected) Icon(Icons.check_circle_rounded, color: color, size: 13),
+          const SizedBox(height: 4),
         ]),
       ),
     );
