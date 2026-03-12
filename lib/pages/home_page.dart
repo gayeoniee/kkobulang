@@ -4,6 +4,7 @@ import '../theme/app_theme.dart';
 import '../data/seed_data.dart';
 import '../models/models.dart';
 import '../widgets/common_widgets.dart';
+import '../services/analytics.dart';
 
 class HomePage extends StatelessWidget {
   final String curlType;
@@ -19,6 +20,7 @@ class HomePage extends StatelessWidget {
   }
 
   void _showGuideModal(BuildContext context) {
+    GA.event('guide_modal_opened');
     showModalBottomSheet(
       context: context, isScrollControlled: true, backgroundColor: Colors.transparent,
       builder: (_) => _GuideModal(),
@@ -26,6 +28,7 @@ class HomePage extends StatelessWidget {
   }
 
   void _showAllRoutines(BuildContext context) {
+    GA.event('routines_all_viewed');
     showModalBottomSheet(
       context: context, isScrollControlled: true, backgroundColor: Colors.transparent,
       builder: (_) => const _AllRoutinesModal(),
@@ -33,6 +36,7 @@ class HomePage extends StatelessWidget {
   }
 
   void _showAllProducts(BuildContext context, List<Product> recProducts) {
+    GA.event('products_all_viewed');
     showModalBottomSheet(
       context: context, isScrollControlled: true, backgroundColor: Colors.transparent,
       builder: (_) => _AllProductsModal(curlType: curlType, recProducts: recProducts),
@@ -40,6 +44,7 @@ class HomePage extends StatelessWidget {
   }
 
   void _showImageAnalysis(BuildContext context) {
+    GA.event('image_analysis_opened', {'source': 'home'});
     showModalBottomSheet(
       context: context, isScrollControlled: true, backgroundColor: Colors.transparent,
       builder: (_) => _ImageAnalysisModal(),
@@ -47,6 +52,7 @@ class HomePage extends StatelessWidget {
   }
 
   void _showTypeHistory(BuildContext context) {
+    GA.event('type_history_opened', {'source': 'home'});
     showModalBottomSheet(
       context: context, isScrollControlled: true, backgroundColor: Colors.transparent,
       builder: (_) => _TypeHistoryModal(curlType: curlType),

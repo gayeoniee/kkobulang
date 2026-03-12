@@ -4,6 +4,7 @@ import '../theme/app_theme.dart';
 import '../data/seed_data.dart';
 import '../models/models.dart';
 import '../widgets/common_widgets.dart';
+import '../services/analytics.dart';
 
 class ProductsPage extends StatefulWidget {
   final String curlType;
@@ -86,7 +87,10 @@ class _ProductsPageState extends State<ProductsPage> {
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, crossAxisSpacing: 12, mainAxisSpacing: 12, childAspectRatio: 0.72),
                 itemCount: _filtered.length,
-                itemBuilder: (_, i) => _ProductCard(product: _filtered[i], onTap: () => setState(() => _selected = _filtered[i])),
+                itemBuilder: (_, i) => _ProductCard(product: _filtered[i], onTap: () {
+              GA.event('product_viewed', {'product_name': _filtered[i].name, 'product_brand': _filtered[i].brand});
+              setState(() => _selected = _filtered[i]);
+            }),
               ),
         ),
       ]),
@@ -138,7 +142,15 @@ class _ProductDetailPage extends StatefulWidget {
 class _ProductDetailPageState extends State<_ProductDetailPage> with SingleTickerProviderStateMixin {
   bool _liked = false;
   late TabController _tab;
-  @override void initState() { super.initState(); _tab = TabController(length: 2, vsync: this); }
+  @override void initState() {
+    super.initState();
+    _tab = TabController(length: 2, vsync: this);
+    _tab.addListener(() {
+      if (!_tab.indexIsChanging) return;
+      final tabName = _tab.index == 0 ? 'ingredients' : 'reviews';
+      GA.event('product_tab_switched', {'tab': tabName, 'product_name': widget.product.name});
+    });
+  }
   @override void dispose() { _tab.dispose(); super.dispose(); }
 
   @override
@@ -190,7 +202,7 @@ class _ProductDetailPageState extends State<_ProductDetailPage> with SingleTicke
                   const SizedBox(width: 10),
                   Expanded(child: SizedBox(height: 34,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () => GA.event('product_purchase_clicked', {'product_name': p.name}),
                       style: ElevatedButton.styleFrom(padding: EdgeInsets.zero, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
                       child: Text('구매 링크', style: GoogleFonts.notoSansKr(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.white)),
                     ),

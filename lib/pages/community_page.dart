@@ -4,6 +4,7 @@ import '../theme/app_theme.dart';
 import '../data/seed_data.dart';
 import '../models/models.dart';
 import '../widgets/common_widgets.dart';
+import '../services/analytics.dart';
 
 String postTypeIcon(String type) {
   switch (type) {
@@ -151,7 +152,10 @@ class _CommunityPageState extends State<CommunityPage> {
               final f = _filters[i];
               final isActive = _filter == f;
               return GestureDetector(
-                onTap: () => setState(() => _filter = f),
+                onTap: () {
+                  GA.event('community_filter_changed', {'filter': f});
+                  setState(() => _filter = f);
+                },
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 150),
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -241,6 +245,12 @@ class _SalonView extends StatefulWidget {
 
 class _SalonViewState extends State<_SalonView> {
   int? _selectedIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    GA.event('salon_map_viewed');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -338,7 +348,10 @@ class _SalonViewState extends State<_SalonView> {
             final salon = _salonList[i];
             final isSelected = _selectedIndex == i;
             return GestureDetector(
-              onTap: () => setState(() => _selectedIndex = i),
+              onTap: () {
+                GA.event('salon_card_clicked', {'salon_name': salon.name});
+                setState(() => _selectedIndex = i);
+              },
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 150),
                 padding: const EdgeInsets.all(14),

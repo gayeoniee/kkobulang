@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_theme.dart';
 import '../data/seed_data.dart';
 import '../models/models.dart';
+import '../services/analytics.dart';
 
 // ── Survey question model ──────────────────────────────────────────────────
 class _Q {
@@ -44,7 +45,7 @@ final _questions = [
     _Opt('lion','사자 갈기처럼 엄청나게 부풀어 오름','🦁'),
     _Opt('unknown','모르겠음','🤷'),
   ]),
-  _Q('단계 2 · 물리적 특성', '[다공성 진단] 마른 머리에 물을 뿌렸을 때\n어떻게 반응하나요?', [
+  _Q('단계 2 · 물리적 특성', '[공극률 진단] 마른 머리에 물을 뿌렸을 때\n어떻게 반응하나요?', [
     _Opt('low','표면에 송골송골 맺혀 한참 뒤에 흡수됨','🔴', sub:'저다공성'),
     _Opt('mid','잠시 맺혔다가 천천히 스며듦','🟡', sub:'중다공성'),
     _Opt('high','뿌리자마자 즉시 스며들어 흔적이 사라짐','🟢', sub:'고다공성'),
@@ -97,6 +98,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
   @override
   void initState() {
     super.initState();
+    GA.event('onboarding_started');
     Future.delayed(const Duration(milliseconds: 2200), () {
       if (mounted) setState(() => _step = 1);
     });
@@ -109,6 +111,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
       setState(() => _step++);
     } else {
       setState(() => _step = 11);
+      GA.event('survey_completed', {'curl_type': _curlType});
     }
   }
 
@@ -122,6 +125,16 @@ class _OnboardingPageState extends State<OnboardingPage> {
     return true;
   }
 
+  void _onAnswer(int qi, dynamic val) {
+    setState(() => _ans[qi] = val);
+    final isUnknown = val == 'unknown' || (val is List && val.contains('unknown'));
+    GA.event('survey_question_answered', {
+      'q_index': qi,
+      'answer': val.toString(),
+      'is_unknown': isUnknown,
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -131,8 +144,14 @@ class _OnboardingPageState extends State<OnboardingPage> {
         child: switch (_step) {
           0 => const _SplashScreen(key: ValueKey('splash')),
           1 => _WelcomeScreen(key: const ValueKey('welcome'), onNext: () => setState(() => _step = 2)),
-          2 => _GenderScreen(key: const ValueKey('gender'), onSelect: (g) { setState(() { _gender = g; _step = 3; }); }),
-          11 => _ResultScreen(key: const ValueKey('result'), curlType: _curlType, answers: _ans, onComplete: widget.onComplete),
+          2 => _GenderScreen(key: const ValueKey('gender'), onSelect: (g) {
+              GA.event('gender_selected', {'gender': g});
+              setState(() { _gender = g; _step = 3; });
+            }),
+          11 => _ResultScreen(key: const ValueKey('result'), curlType: _curlType, answers: _ans, onComplete: (type) {
+              GA.event('onboarding_completed', {'curl_type': type});
+              widget.onComplete(type);
+            }),
           _ => _SurveyScreen(
               key: ValueKey(_step),
               question: _questions[_step - 3],
@@ -141,7 +160,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
               answer: _ans[_step - 3],
               canProceed: _canProceed(),
               gender: _gender,
-              onAnswer: (val) => setState(() => _ans[_step - 3] = val),
+              onAnswer: (val) => _onAnswer(_step - 3, val),
               onNext: _canProceed() ? _next : null,
               onBack: () => setState(() => _step--),
             ),

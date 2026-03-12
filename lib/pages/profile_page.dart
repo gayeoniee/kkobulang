@@ -4,6 +4,7 @@ import '../theme/app_theme.dart';
 import '../data/seed_data.dart';
 import '../models/models.dart';
 import '../widgets/common_widgets.dart';
+import '../services/analytics.dart';
 
 class ProfilePage extends StatefulWidget {
   final String curlType;
@@ -45,6 +46,7 @@ class _ProfilePageState extends State<ProfilePage> {
   void dispose() { _nickCtrl.dispose(); _bioCtrl.dispose(); super.dispose(); }
 
   void _showImageAnalysis(BuildContext context) {
+    GA.event('image_analysis_opened', {'source': 'profile'});
     showModalBottomSheet(
       context: context, isScrollControlled: true, backgroundColor: Colors.transparent,
       builder: (_) => AppBottomSheet(
@@ -76,6 +78,7 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   void _showTypeHistory(BuildContext context) {
+    GA.event('type_history_opened', {'source': 'profile'});
     final typeInfo = curlTypes.firstWhere((t) => t.id == widget.curlType, orElse: () => curlTypes[4]);
     final typeColor = AppColors.curlTypeColor(widget.curlType);
     showModalBottomSheet(

@@ -7,6 +7,7 @@ import 'pages/products_page.dart';
 import 'pages/diary_page.dart';
 import 'pages/community_page.dart';
 import 'pages/profile_page.dart';
+import 'services/analytics.dart';
 
 class KkobulangApp extends StatelessWidget {
   const KkobulangApp({super.key});
@@ -48,6 +49,7 @@ class _RootState extends State<_Root> {
   int _tutorialStep = 0;
 
   void _onComplete(String type) {
+    GA.event('tutorial_started');
     setState(() {
       _curlType = type;
       _tab = 0;
@@ -58,11 +60,14 @@ class _RootState extends State<_Root> {
 
   void _nextTutorial() {
     if (_tutorialStep < 4) {
+      final next = _tutorialStep + 1;
+      GA.event('tutorial_step_viewed', {'step': next});
       setState(() {
-        _tutorialStep++;
-        _tab = _tutorialStep;
+        _tutorialStep = next;
+        _tab = next;
       });
     } else {
+      GA.event('tutorial_completed');
       setState(() {
         _showTutorial = false;
         _tab = 0;
@@ -79,7 +84,10 @@ class _RootState extends State<_Root> {
     }
   }
 
-  void _skipTutorial() => setState(() { _showTutorial = false; _tab = 0; });
+  void _skipTutorial() {
+    GA.event('tutorial_skipped', {'at_step': _tutorialStep});
+    setState(() { _showTutorial = false; _tab = 0; });
+  }
 
   @override
   Widget build(BuildContext context) {

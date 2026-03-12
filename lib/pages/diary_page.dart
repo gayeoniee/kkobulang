@@ -4,6 +4,7 @@ import '../theme/app_theme.dart';
 import '../data/seed_data.dart';
 import '../models/models.dart';
 import '../widgets/common_widgets.dart';
+import '../services/analytics.dart';
 
 const _curlStateEmojis = ['😞','😕','😐','😊','🥰'];
 const _curlStateLabels = ['최악','별로','보통','좋음','완벽'];
@@ -34,13 +35,20 @@ class _DiaryPageState extends State<DiaryPage> {
   late List<DiaryEntry> _entries;
   @override void initState() { super.initState(); _entries = List.from(diaryEntries); }
 
-  void _openForm() => showModalBottomSheet(
-    context: context, isScrollControlled: true, backgroundColor: Colors.transparent,
-    builder: (_) => _DiaryForm(
-      onSave: (e) { setState(() => _entries.insert(0, e)); Navigator.pop(context); },
-      lastEntry: _entries.isNotEmpty ? _entries.first : null,
-    ),
-  );
+  void _openForm() {
+    GA.event('diary_form_opened');
+    showModalBottomSheet(
+      context: context, isScrollControlled: true, backgroundColor: Colors.transparent,
+      builder: (_) => _DiaryForm(
+        onSave: (e) {
+          GA.event('diary_entry_saved', {'curl_state': e.result});
+          setState(() => _entries.insert(0, e));
+          Navigator.pop(context);
+        },
+        lastEntry: _entries.isNotEmpty ? _entries.first : null,
+      ),
+    );
+  }
 
   Map<String, List<DiaryEntry>> get _bySeason {
     final map = <String, List<DiaryEntry>>{};
@@ -195,6 +203,7 @@ class _DiaryFormState extends State<_DiaryForm> {
 
   void _loadLastRoutine() {
     if (widget.lastEntry == null) return;
+    GA.event('diary_auto_load_routine');
     setState(() => _routine = List.from(widget.lastEntry!.routine));
   }
 
@@ -303,7 +312,7 @@ class _DiaryFormState extends State<_DiaryForm> {
             if (widget.lastEntry != null)
               GestureDetector(
                 onTap: () {
-                  // 마지막 기록의 루틴을 제품으로 쓰는 대신, 샘플 최근 제품 불러오기
+                  GA.event('diary_auto_load_product');
                   setState(() {
                     if (_products.isEmpty) _products.addAll(['컬크림', '리브인컨디셔너']);
                   });
