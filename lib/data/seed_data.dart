@@ -89,7 +89,7 @@ final List<CommunityPost> pinnedPosts = [
 ];
 
 List<CommunityPost> communityPosts = [
-  CommunityPost(id: 1, author: '수진이', avatar: '🌸', curlType: '3B', time: '2시간 전',
+  CommunityPost(id: 1, author: '꼬불이', avatar: '🌸', curlType: '3B', time: '2시간 전',
     title: 'LOC 방법 드디어 성공!',
     content: '드디어 LOC 방법 성공했어요!! 3주 동안 매일 다르게 해봤는데 이게 제일 잘 맞네요. 컬크림 바르기 전에 리브인 컨디셔너 꼭 써보세요 🙌',
     likes: 24, comments: 8, tags: ['LOC방법', '3B', '컬케어팁'], hasImage: true, postType: 'tip'),

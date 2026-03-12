@@ -296,7 +296,7 @@ class _ReviewTab extends StatelessWidget {
   const _ReviewTab({required this.product});
 
   static const _sampleReviews = [
-    ('수진이', '3B', 4.5, '진짜 대박이에요! 습도가 높아도 컬이 무너지지 않아요. 재구매 예정입니다 ✨'),
+    ('꼬불이', '3B', 4.5, '진짜 대박이에요! 습도가 높아도 컬이 무너지지 않아요. 재구매 예정입니다 ✨'),
     ('곱슬요정', '2C', 4.0, '냄새가 좋고 사용감이 부드러워요. 다만 가격이 좀 세긴 해요.'),
     ('컬리걸', '3C', 5.0, '이 제품 없이 어떻게 살았나 싶어요. 제 구원템 등극!'),
   ];

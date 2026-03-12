@@ -102,7 +102,7 @@ class HomePage extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Row(children: [
-                    Text('수진이', style: GoogleFonts.notoSansKr(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.brown)),
+                    Text('꼬불이', style: GoogleFonts.notoSansKr(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.brown)),
                     const SizedBox(width: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -588,7 +588,7 @@ class _ProductMiniCard extends StatelessWidget {
 // ── 추천 루틴 데이터 ──
 const _sampleRoutines = [
   (
-    author: '수진이',
+    author: '꼬불이',
     avatar: '🌸',
     curlType: '3B',
     name: 'LOC 딥케어 루틴',

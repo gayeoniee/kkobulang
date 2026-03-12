@@ -38,7 +38,7 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   void initState() {
     super.initState();
-    _nickCtrl = TextEditingController(text: '수진이');
+    _nickCtrl = TextEditingController(text: '꼬불이');
     _bioCtrl = TextEditingController(text: '3B 컬을 사랑하는 직장인 🌀');
   }
 
