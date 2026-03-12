@@ -42,13 +42,13 @@ Color postTypeColor(String type) {
   }
 }
 
-// 미용실 샘플 데이터
+// 미용실 샘플 데이터 (하남시 기준)
 const _salonList = [
-  (name: '꼬불랑 헤어살롱', dist: '0.3km', address: '서울 마포구 연남동', rating: 4.8, nx: 0.50, ny: 0.45),
-  (name: '컬리걸 헤어스튜디오', dist: '0.8km', address: '서울 마포구 합정동', rating: 4.6, nx: 0.28, ny: 0.62),
-  (name: '웨이비웨이브', dist: '1.2km', address: '서울 마포구 망원동', rating: 4.5, nx: 0.72, ny: 0.30),
-  (name: '곱슬전문 손질소', dist: '1.5km', address: '서울 마포구 서교동', rating: 4.3, nx: 0.20, ny: 0.35),
-  (name: '케어컬 스튜디오', dist: '2.1km', address: '서울 서대문구 홍은동', rating: 4.2, nx: 0.76, ny: 0.68),
+  (name: '꼬불랑 헤어살롱', dist: '0.2km', address: '경기 하남시 대청로', rating: 4.8, nx: 0.50, ny: 0.45),
+  (name: '컬리걸 헤어스튜디오', dist: '0.7km', address: '경기 하남시 신장동', rating: 4.6, nx: 0.28, ny: 0.62),
+  (name: '웨이비웨이브', dist: '1.1km', address: '경기 하남시 덕풍동', rating: 4.5, nx: 0.72, ny: 0.30),
+  (name: '곱슬전문 손질소', dist: '1.4km', address: '경기 하남시 풍산동', rating: 4.3, nx: 0.20, ny: 0.35),
+  (name: '케어컬 스튜디오', dist: '2.0km', address: '경기 하남시 미사강변동', rating: 4.2, nx: 0.76, ny: 0.68),
 ];
 
 class CommunityPage extends StatefulWidget {
@@ -263,7 +263,7 @@ class _SalonViewState extends State<_SalonView> {
         child: Row(children: [
           const Icon(Icons.location_on_rounded, size: 14, color: AppColors.teal),
           const SizedBox(width: 6),
-          Text('현재 위치: 서울 마포구 연남동',
+          Text('현재 위치: 경기 하남시 하남시청역',
             style: GoogleFonts.notoSansKr(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.tealDark)),
         ]),
       ),
@@ -276,54 +276,94 @@ class _SalonViewState extends State<_SalonView> {
           borderRadius: BorderRadius.circular(16),
           child: SizedBox(
             height: 220,
-            child: Stack(
-              children: [
+            width: double.infinity,
+            child: LayoutBuilder(builder: (context, constraints) {
+              final w = constraints.maxWidth;
+              const h = 220.0;
+              return Stack(children: [
                 // 지도 배경
-                Positioned.fill(
-                  child: CustomPaint(painter: _FakeMapPainter()),
-                ),
-                // 현위치 핀
-                const Positioned(
-                  left: 0, right: 0, top: 0, bottom: 0,
-                  child: _CurrentLocationPin(),
+                Container(width: w, height: h, color: const Color(0xFFE8F0E9)),
+                // 가로 도로
+                Positioned(top: h * 0.25 - 4, left: 0, right: 0, child: Container(height: 8, color: Colors.white)),
+                Positioned(top: h * 0.50 - 4, left: 0, right: 0, child: Container(height: 10, color: Colors.white)),
+                Positioned(top: h * 0.75 - 3, left: 0, right: 0, child: Container(height: 6, color: Colors.white)),
+                // 세로 도로
+                Positioned(left: w * 0.25 - 3, top: 0, bottom: 0, child: Container(width: 6, color: Colors.white)),
+                Positioned(left: w * 0.50 - 4, top: 0, bottom: 0, child: Container(width: 8, color: Colors.white)),
+                Positioned(left: w * 0.75 - 3, top: 0, bottom: 0, child: Container(width: 6, color: Colors.white)),
+                // 블록들
+                for (final r in [
+                  Rect.fromLTWH(w*0.05, h*0.05, w*0.17, h*0.17),
+                  Rect.fromLTWH(w*0.28, h*0.05, w*0.19, h*0.17),
+                  Rect.fromLTWH(w*0.55, h*0.05, w*0.17, h*0.17),
+                  Rect.fromLTWH(w*0.05, h*0.30, w*0.17, h*0.17),
+                  Rect.fromLTWH(w*0.55, h*0.30, w*0.17, h*0.17),
+                  Rect.fromLTWH(w*0.05, h*0.55, w*0.17, h*0.17),
+                  Rect.fromLTWH(w*0.28, h*0.55, w*0.19, h*0.17),
+                  Rect.fromLTWH(w*0.55, h*0.55, w*0.17, h*0.17),
+                  Rect.fromLTWH(w*0.05, h*0.78, w*0.17, h*0.17),
+                  Rect.fromLTWH(w*0.55, h*0.78, w*0.17, h*0.17),
+                ])
+                  Positioned(
+                    left: r.left, top: r.top,
+                    child: Container(
+                      width: r.width, height: r.height,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFD4E6D5),
+                        borderRadius: BorderRadius.circular(3),
+                      ),
+                    ),
+                  ),
+                // 현위치 파란 점 (중앙)
+                Positioned(
+                  left: w * 0.5 - 10, top: h * 0.5 - 10,
+                  child: Container(
+                    width: 20, height: 20,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF4285F4),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 3),
+                      boxShadow: [BoxShadow(color: const Color(0xFF4285F4).withValues(alpha: 0.5), blurRadius: 8, spreadRadius: 2)],
+                    ),
+                  ),
                 ),
                 // 미용실 핀들
-                for (int i = 0; i < _salonList.length; i++)
-                  LayoutBuilder(builder: (context, constraints) {
-                    final salon = _salonList[i];
-                    final x = constraints.maxWidth * salon.nx - 16;
-                    final y = 220 * salon.ny - 16;
-                    final isSelected = _selectedIndex == i;
-                    return Positioned(
-                      left: x, top: y,
-                      child: GestureDetector(
-                        onTap: () => setState(() => _selectedIndex = i),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          padding: EdgeInsets.symmetric(horizontal: isSelected ? 8 : 5, vertical: isSelected ? 4 : 2),
-                          decoration: BoxDecoration(
-                            color: isSelected ? AppColors.peach : Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: [BoxShadow(
-                              color: (isSelected ? AppColors.peach : Colors.black).withValues(alpha: 0.25),
-                              blurRadius: isSelected ? 8 : 4, offset: const Offset(0, 2),
-                            )],
-                            border: isSelected ? null : Border.all(color: AppColors.peach, width: 1.5),
-                          ),
-                          child: Text(
-                            isSelected ? salon.name : '💈',
-                            style: GoogleFonts.notoSansKr(
-                              fontSize: isSelected ? 10 : 13,
-                              fontWeight: FontWeight.w700,
-                              color: isSelected ? Colors.white : AppColors.peach,
-                            ),
+                for (int i = 0; i < _salonList.length; i++) ...[
+                  Positioned(
+                    left: w * _salonList[i].nx - 16,
+                    top: h * _salonList[i].ny - 16,
+                    child: GestureDetector(
+                      onTap: () => setState(() => _selectedIndex = i),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: _selectedIndex == i ? 8 : 5,
+                          vertical: _selectedIndex == i ? 4 : 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: _selectedIndex == i ? AppColors.peach : Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: _selectedIndex == i ? null : Border.all(color: AppColors.peach, width: 1.5),
+                          boxShadow: [BoxShadow(
+                            color: (_selectedIndex == i ? AppColors.peach : Colors.black).withValues(alpha: 0.25),
+                            blurRadius: _selectedIndex == i ? 8 : 4,
+                            offset: const Offset(0, 2),
+                          )],
+                        ),
+                        child: Text(
+                          _selectedIndex == i ? _salonList[i].name : '💈',
+                          style: GoogleFonts.notoSansKr(
+                            fontSize: _selectedIndex == i ? 10 : 13,
+                            fontWeight: FontWeight.w700,
+                            color: _selectedIndex == i ? Colors.white : AppColors.peach,
                           ),
                         ),
                       ),
-                    );
-                  }),
-              ],
-            ),
+                    ),
+                  ),
+                ],
+              ]);
+            }),
           ),
         ),
       ),
@@ -402,72 +442,6 @@ class _SalonViewState extends State<_SalonView> {
   }
 }
 
-// 현위치 핀 (화면 중앙)
-class _CurrentLocationPin extends StatelessWidget {
-  const _CurrentLocationPin();
-  @override
-  Widget build(BuildContext context) => Center(
-    child: Column(mainAxisSize: MainAxisSize.min, children: [
-      Container(
-        width: 20, height: 20,
-        decoration: BoxDecoration(
-          color: const Color(0xFF4285F4),
-          shape: BoxShape.circle,
-          border: Border.all(color: Colors.white, width: 3),
-          boxShadow: [BoxShadow(color: const Color(0xFF4285F4).withValues(alpha: 0.5), blurRadius: 8, spreadRadius: 2)],
-        ),
-      ),
-    ]),
-  );
-}
-
-// 가짜 지도 배경 그리기
-class _FakeMapPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    // 배경
-    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height),
-      Paint()..color = const Color(0xFFE8F0E9));
-
-    final roadPaint = Paint()
-      ..color = Colors.white
-      ..strokeWidth = 8
-      ..strokeCap = StrokeCap.round;
-
-    final minorRoadPaint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.7)
-      ..strokeWidth = 4;
-
-    // 메인 도로들
-    canvas.drawLine(Offset(0, size.height * 0.5), Offset(size.width, size.height * 0.5), roadPaint);
-    canvas.drawLine(Offset(size.width * 0.5, 0), Offset(size.width * 0.5, size.height), roadPaint);
-    canvas.drawLine(Offset(0, size.height * 0.25), Offset(size.width, size.height * 0.25), minorRoadPaint);
-    canvas.drawLine(Offset(0, size.height * 0.75), Offset(size.width, size.height * 0.75), minorRoadPaint);
-    canvas.drawLine(Offset(size.width * 0.25, 0), Offset(size.width * 0.25, size.height), minorRoadPaint);
-    canvas.drawLine(Offset(size.width * 0.75, 0), Offset(size.width * 0.75, size.height), minorRoadPaint);
-
-    // 블록들
-    final blockPaint = Paint()..color = const Color(0xFFD4E6D5);
-    final blocks = [
-      Rect.fromLTWH(size.width * 0.05, size.height * 0.05, size.width * 0.17, size.height * 0.17),
-      Rect.fromLTWH(size.width * 0.28, size.height * 0.05, size.width * 0.19, size.height * 0.17),
-      Rect.fromLTWH(size.width * 0.55, size.height * 0.05, size.width * 0.17, size.height * 0.17),
-      Rect.fromLTWH(size.width * 0.05, size.height * 0.3, size.width * 0.17, size.height * 0.17),
-      Rect.fromLTWH(size.width * 0.55, size.height * 0.3, size.width * 0.17, size.height * 0.17),
-      Rect.fromLTWH(size.width * 0.05, size.height * 0.55, size.width * 0.17, size.height * 0.17),
-      Rect.fromLTWH(size.width * 0.28, size.height * 0.55, size.width * 0.19, size.height * 0.17),
-      Rect.fromLTWH(size.width * 0.55, size.height * 0.55, size.width * 0.17, size.height * 0.17),
-      Rect.fromLTWH(size.width * 0.05, size.height * 0.78, size.width * 0.17, size.height * 0.17),
-      Rect.fromLTWH(size.width * 0.55, size.height * 0.78, size.width * 0.17, size.height * 0.17),
-    ];
-    for (final b in blocks) {
-      canvas.drawRRect(RRect.fromRectAndRadius(b, const Radius.circular(3)), blockPaint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(_FakeMapPainter old) => false;
-}
 
 // ── Post Card ──────────────────────────────────────────────────────────────
 class _PostCard extends StatefulWidget {
