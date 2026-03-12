@@ -68,7 +68,7 @@ class HomePage extends StatelessWidget {
 
     return CustomScrollView(slivers: [
       SliverAppBar(
-        floating: true,
+        pinned: true,
         title: Row(mainAxisSize: MainAxisSize.min, children: [
           Image.asset('assets/kkobulang_logo.png', height: 28, fit: BoxFit.contain),
           const SizedBox(width: 6),

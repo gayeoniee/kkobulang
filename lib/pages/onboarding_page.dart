@@ -148,7 +148,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
               GA.event('gender_selected', {'gender': g});
               setState(() { _gender = g; _step = 3; });
             }),
-          11 => _ResultScreen(key: const ValueKey('result'), curlType: _curlType, answers: _ans, onComplete: (type) {
+          11 => _ResultScreen(key: const ValueKey('result'), curlType: _curlType, answers: _ans, gender: _gender, onComplete: (type) {
               GA.event('onboarding_completed', {'curl_type': type});
               widget.onComplete(type);
             }),
@@ -217,7 +217,9 @@ class _WelcomeScreen extends StatelessWidget {
         child: Column(children: [
           const SizedBox(height: 16),
           Image.asset('assets/kkobulang_logo.png', width: 160),
-          const SizedBox(height: 20),
+          const SizedBox(height: 8),
+          Image.asset('assets/kkobulang_sun.png', width: 110),
+          const SizedBox(height: 12),
           Text('한국 곱슬머리를 위한\n케어 정보와 커뮤니티 공간이에요',
             textAlign: TextAlign.center,
             style: GoogleFonts.notoSansKr(fontSize: 14, color: AppColors.brownMid, height: 1.65)),
@@ -542,8 +544,15 @@ class _OptionTile extends StatelessWidget {
 class _ResultScreen extends StatelessWidget {
   final String curlType;
   final Map<int, dynamic> answers;
+  final String? gender;
   final void Function(String) onComplete;
-  const _ResultScreen({super.key, required this.curlType, required this.answers, required this.onComplete});
+  const _ResultScreen({super.key, required this.curlType, required this.answers, this.gender, required this.onComplete});
+
+  String get _typeImagePath {
+    final prefix = gender == 'male' ? 'm' : 'f';
+    final suffix = curlType.toLowerCase();
+    return 'assets/$prefix$suffix.png';
+  }
 
   String _porosityLabel() {
     return switch (answers[3] as String? ?? 'mid') {
@@ -583,7 +592,12 @@ class _ResultScreen extends StatelessWidget {
             child: Column(children: [
               Text('이 유형에 가까워요', style: GoogleFonts.notoSansKr(fontSize: 16, color: Colors.white70, fontWeight: FontWeight.w600)),
               const SizedBox(height: 12),
-              Text(info.emoji, style: const TextStyle(fontSize: 60)),
+              Image.asset(
+                _typeImagePath,
+                height: 160,
+                fit: BoxFit.contain,
+                errorBuilder: (_, __, ___) => Text(info.emoji, style: const TextStyle(fontSize: 60)),
+              ),
               const SizedBox(height: 8),
               Text(info.id, style: GoogleFonts.notoSansKr(fontSize: 48, fontWeight: FontWeight.w900, color: Colors.white)),
               Text(info.title, style: GoogleFonts.notoSansKr(fontSize: 20, fontWeight: FontWeight.w700, color: Colors.white.withValues(alpha: 0.9))),
