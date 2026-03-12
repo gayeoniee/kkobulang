@@ -186,9 +186,11 @@ class _SplashScreenState extends State<_SplashScreen> with SingleTickerProviderS
     child: Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
       ScaleTransition(
         scale: _s,
-        child: Image.asset('assets/kkobulang_logo.png', width: 200),
+        child: Image.asset('assets/kkobulang_sun.png', width: 180),
       ),
-      const SizedBox(height: 16),
+      const SizedBox(height: 20),
+      Image.asset('assets/kkobulang_logo.png', width: 160),
+      const SizedBox(height: 14),
       Text('내 곱슬에 맞는 케어를 찾아봐요', style: GoogleFonts.notoSansKr(fontSize: 13, color: AppColors.brownMid)),
     ])),
   );

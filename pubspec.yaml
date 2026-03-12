@@ -24,6 +24,8 @@ flutter:
 
   assets:
     - assets/kkobulang_logo.png
+    - assets/kkobulang_sun.png
+    - assets/kkobulang_green.png
     - assets/f2a.png
     - assets/f2b.png
     - assets/f2c.png
