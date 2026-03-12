@@ -109,6 +109,21 @@ class _RootState extends State<_Root> {
     return Stack(
       children: [
         Scaffold(
+          appBar: AppBar(
+            titleSpacing: 16,
+            title: Row(mainAxisSize: MainAxisSize.min, children: [
+              Image.asset('assets/kkobulang_logo.png', height: 28, fit: BoxFit.contain),
+              const SizedBox(width: 6),
+              Transform.translate(
+                offset: const Offset(0, -4),
+                child: Image.asset('assets/kkobulang_green.png', height: 36, fit: BoxFit.contain),
+              ),
+            ]),
+            actions: [
+              IconButton(icon: const Icon(Icons.notifications_outlined), onPressed: () {}),
+              IconButton(icon: const Icon(Icons.search), onPressed: () {}),
+            ],
+          ),
           body: IndexedStack(index: _tab, children: pages),
           bottomNavigationBar: BottomNavigationBar(
             currentIndex: _tab,
