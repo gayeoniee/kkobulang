@@ -22,8 +22,10 @@ class HairAnalysisResult {
   factory HairAnalysisResult.fromJson(Map<String, dynamic> j) {
     return HairAnalysisResult(
       top: SectionResult(type: j['top'] ?? '?', reason: j['top_reason'] ?? ''),
-      middle: SectionResult(type: j['middle'] ?? '?', reason: j['middle_reason'] ?? ''),
-      bottom: SectionResult(type: j['bottom'] ?? '?', reason: j['bottom_reason'] ?? ''),
+      middle: SectionResult(
+          type: j['middle'] ?? '?', reason: j['middle_reason'] ?? ''),
+      bottom: SectionResult(
+          type: j['bottom'] ?? '?', reason: j['bottom_reason'] ?? ''),
       overallType: j['overall'] ?? '?',
       reasoning: j['reasoning'] ?? '',
     );
@@ -32,7 +34,7 @@ class HairAnalysisResult {
 
 class GeminiService {
   static final _prompt = '''
-당신은 헤어 전문가입니다. 제공된 머리카락 사진을 안드레 워커 분류 체계로 분석해주세요.
+당신은 한국인 헤어 전문가입니다. 제공된 머리카락 사진을 안드레 워커 분류 체계로 분석해주세요.
 
 머리카락을 다음 3개 섹션으로 나누어 각각의 곱슬 유형을 판단해주세요:
 - 상단(top): 뿌리~두피 부근
@@ -45,15 +47,15 @@ class GeminiService {
 - 타입 3 (컬리): 3A(느슨한 나선), 3B(중간 나선), 3C(촘촘한 나선)
 - 타입 4 (코일리): 4A(S패턴 코일), 4B(Z패턴), 4C(매우 촘촘한 코일)
 
-반드시 아래 JSON 형식으로만 답변하세요 (다른 텍스트, 마크다운 없이):
+반드시 아래 예시 JSON 형식으로만 답변하세요 (다른 텍스트, 마크다운 없이):
 {
-  "top": "3A",
+  "top": "2A",
   "top_reason": "뿌리 부근 컬 패턴 한 줄 설명",
-  "middle": "3B",
+  "middle": "2B",
   "middle_reason": "중단 컬 패턴 한 줄 설명",
-  "bottom": "3B",
+  "bottom": "2B",
   "bottom_reason": "끝부분 컬 패턴 한 줄 설명",
-  "overall": "3B",
+  "overall": "2B",
   "reasoning": "전체 종합 판단 근거 한 줄"
 }
 ''';
