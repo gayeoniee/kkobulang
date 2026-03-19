@@ -8,6 +8,7 @@ import 'pages/diary_page.dart';
 import 'pages/community_page.dart';
 import 'pages/profile_page.dart';
 import 'services/analytics.dart';
+import 'models/diagnosis_history.dart';
 
 class KkobulangApp extends StatelessWidget {
   const KkobulangApp({super.key});
@@ -50,6 +51,7 @@ class _RootState extends State<_Root> {
 
   void _onComplete(String type) {
     GA.event('tutorial_started');
+    DiagnosisHistory.instance.addSurveyResult(type);
     setState(() {
       _curlType = type;
       _tab = 0;

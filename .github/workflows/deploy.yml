@@ -27,7 +27,13 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
-      # 4. 웹 빌드
+      # 4. API 키 파일 생성 (git에 없으므로 빌드 전에 자동 생성)
+      - name: Create secrets.dart
+        run: |
+          mkdir -p lib/config
+          echo "const String geminiApiKey = '${{ secrets.GEMINI_API_KEY }}';" > lib/config/secrets.dart
+
+      # 5. 웹 빌드
       - name: Build Flutter Web
         run: flutter build web --release --base-href "/"
 

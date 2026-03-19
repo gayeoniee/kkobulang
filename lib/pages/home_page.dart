@@ -3,7 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_theme.dart';
 import '../data/seed_data.dart';
 import '../models/models.dart';
+import '../models/diagnosis_history.dart';
 import '../widgets/common_widgets.dart';
+import '../widgets/diagnosis_widgets.dart';
 import '../services/analytics.dart';
 
 class HomePage extends StatelessWidget {
@@ -47,7 +49,7 @@ class HomePage extends StatelessWidget {
     GA.event('image_analysis_opened', {'source': 'home'});
     showModalBottomSheet(
       context: context, isScrollControlled: true, backgroundColor: Colors.transparent,
-      builder: (_) => _ImageAnalysisModal(),
+      builder: (_) => const ImageAnalysisModal(),
     );
   }
 
@@ -55,7 +57,7 @@ class HomePage extends StatelessWidget {
     GA.event('type_history_opened', {'source': 'home'});
     showModalBottomSheet(
       context: context, isScrollControlled: true, backgroundColor: Colors.transparent,
-      builder: (_) => _TypeHistoryModal(curlType: curlType),
+      builder: (_) => const TypeHistoryModal(),
     );
   }
 
@@ -234,127 +236,231 @@ class _SmallIconBtn extends StatelessWidget {
 // ── 꼬불랑 입문가이드 모달 ───────────────────────────────────────────────────
 class _GuideModal extends StatelessWidget {
   @override
-  Widget build(BuildContext context) => AppBottomSheet(
-    child: Padding(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
-      child: Column(mainAxisSize: MainAxisSize.min, children: [
-        Text('📖 꼬불랑 입문가이드', style: GoogleFonts.notoSansKr(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.brown)),
-        const SizedBox(height: 6),
-        Text('곱슬 케어 첫 걸음을 함께해요', style: GoogleFonts.notoSansKr(fontSize: 13, color: AppColors.brownLight)),
-        const SizedBox(height: 24),
-        Container(
-          width: double.infinity, height: 200,
-          decoration: BoxDecoration(
-            color: AppColors.tealLight,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-            const Text('🌿', style: TextStyle(fontSize: 48)),
-            const SizedBox(height: 12),
-            Text('콘텐츠 준비 중이에요!', style: GoogleFonts.notoSansKr(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.tealDark)),
-            const SizedBox(height: 6),
-            Text('곧 꼼꼼한 입문 가이드로\n찾아올게요 🙌', textAlign: TextAlign.center,
-              style: GoogleFonts.notoSansKr(fontSize: 13, color: AppColors.teal, height: 1.5)),
-          ]),
-        ),
-        const SizedBox(height: 20),
-        buildPrimaryButton('닫기', () => Navigator.pop(context)),
-      ]),
-    ),
-  );
-}
-
-// ── 이미지 분석 모달 ─────────────────────────────────────────────────────────
-class _ImageAnalysisModal extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) => AppBottomSheet(
-    child: Padding(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
-      child: Column(mainAxisSize: MainAxisSize.min, children: [
-        Text('📷 이미지로 유형 분석', style: GoogleFonts.notoSansKr(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.brown)),
-        const SizedBox(height: 6),
-        Text('머리 사진으로 곱슬 유형을 분석해요', style: GoogleFonts.notoSansKr(fontSize: 13, color: AppColors.brownLight)),
-        const SizedBox(height: 24),
-        Container(
-          width: double.infinity, height: 180,
-          decoration: BoxDecoration(color: AppColors.peachLight, borderRadius: BorderRadius.circular(16)),
-          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-            const Text('🔬', style: TextStyle(fontSize: 48)),
-            const SizedBox(height: 12),
-            Text('준비 중이에요!', style: GoogleFonts.notoSansKr(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.peachDark)),
-            const SizedBox(height: 6),
-            Text('AI 이미지 분석 기능이\n곧 출시될 예정이에요', textAlign: TextAlign.center,
-              style: GoogleFonts.notoSansKr(fontSize: 13, color: AppColors.brownMid)),
-          ]),
-        ),
-        const SizedBox(height: 20),
-        buildPrimaryButton('닫기', () => Navigator.pop(context)),
-      ]),
-    ),
-  );
-}
-
-// ── 유형진단 이력 모달 ──────────────────────────────────────────────────────
-class _TypeHistoryModal extends StatelessWidget {
-  final String curlType;
-  const _TypeHistoryModal({required this.curlType});
-  @override
   Widget build(BuildContext context) {
-    final typeInfo = curlTypes.firstWhere((t) => t.id == curlType, orElse: () => curlTypes[4]);
-    final typeColor = AppColors.curlTypeColor(curlType);
-    return AppBottomSheet(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
-        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text('📋 유형 진단 이력', style: GoogleFonts.notoSansKr(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.brown)),
+    return DraggableScrollableSheet(
+      initialChildSize: 0.92,
+      minChildSize: 0.5,
+      maxChildSize: 0.95,
+      expand: false,
+      builder: (_, controller) => Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(children: [
+          const SizedBox(height: 12),
+          Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(2))),
           const SizedBox(height: 16),
-          _HistoryItem(date: '2026.03.11', typeId: curlType, title: typeInfo.title, color: typeColor, isCurrent: true),
-          _HistoryItem(date: '2025.11.03', typeId: '3A', title: '느슨한 컬', color: AppColors.curlTypeColor('3A'), isCurrent: false),
-          _HistoryItem(date: '2025.06.15', typeId: '2C', title: '굵은 웨이브', color: AppColors.curlTypeColor('2C'), isCurrent: false),
-          const SizedBox(height: 16),
-          buildPrimaryButton('닫기', () => Navigator.pop(context)),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(children: [
+              Text('📖 꼬불랑 입문가이드', style: GoogleFonts.notoSansKr(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.brown)),
+              const SizedBox(height: 4),
+              Text('곱슬 케어 첫 걸음을 함께해요', style: GoogleFonts.notoSansKr(fontSize: 13, color: AppColors.brownLight)),
+            ]),
+          ),
+          const SizedBox(height: 12),
+          Expanded(
+            child: ListView(controller: controller, padding: const EdgeInsets.fromLTRB(16, 0, 16, 32), children: [
+              _GuideSection(
+                emoji: '📊', title: '한국인의 곱슬머리 현황',
+                color: AppColors.peachLight,
+                child: _guideText(
+                  '한국인 2명 중 1명(53%)은 곱슬머리예요!\n\n'
+                  '유전적 곱슬: 25%\n후천적 곱슬(노화·손상 등): 28%\n\n'
+                  '타고나지 않아도 곱슬이 되는 경우가 많답니다. 내 머리가 왜 곱슬인지 알면 관리도 달라져요!',
+                ),
+              ),
+              _GuideSection(
+                emoji: '🌀', title: '곱슬머리 유형 분류 (4가지 타입)',
+                color: const Color(0xFFE8F5E9),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  _typeRow('타입 1', '직모 (Straight)', '컬이 전혀 없이 일자로 쭉 뻗은 생머리예요.'),
+                  _typeRow('타입 2', '웨이브 (Wavy)', 'S자 완만한 곡선 형태예요. 2A(느슨함)→2C(뚜렷함)로 갈수록 컬이 강해져요.'),
+                  _typeRow('타입 3', '컬리 (Curly)', '나선형 코르크 모양이에요. 3A→3C(연필 굵기)로 갈수록 촘촘해져요.'),
+                  _typeRow('타입 4', '코일리 (Coily)', '지그재그·촘촘한 용수철 모양이에요. 한국인에게는 드문 유형이에요.'),
+                ]),
+              ),
+              _GuideSection(
+                emoji: '💚', title: 'CGM(Curly Girl Method)이란?',
+                color: AppColors.tealLight,
+                child: _guideText(
+                  'CGM은 곱슬머리를 억지로 펴지 않고, 수분을 듬뿍 주어 본연의 예쁜 컬을 살리는 관리법이에요.\n\n'
+                  '곱슬은 고쳐야 할 대상이 아니라, 소중히 가꿔야 할 나의 개성이에요! 🌿',
+                ),
+              ),
+              _GuideSection(
+                emoji: '🚫✅', title: 'CGM 기본 규칙',
+                color: const Color(0xFFFFF3E0),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  _ruleRow('🚫', '열 기구', '고데기와 뜨거운 바람은 컬을 파괴해요'),
+                  _ruleRow('🚫', '마른 빗질', '컬이 풀리고 사자머리처럼 부스스해져요'),
+                  _ruleRow('🚫', '일반 수건', '표면이 거칠어 컬을 망쳐요 → 티셔츠·극세사 타월 권장'),
+                  const Divider(height: 20),
+                  _ruleRow('✅', '순한 세정', '코워시나 로우푸 샴푸를 사용해요'),
+                  _ruleRow('✅', '젖은 상태 관리', '모든 관리는 머리가 젖었을 때 해야 컬이 잘 잡혀요'),
+                  _ruleRow('✅', '수분 꽉 잡기', '리브인 컨디셔너와 젤로 수분을 가둬줘요'),
+                ]),
+              ),
+              _GuideSection(
+                emoji: '5️⃣', title: '실전! CGM 5단계 루틴',
+                color: const Color(0xFFF3E5F5),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  _stepRow('1', '세정', '설페이트 프리 샴푸나 코워시로 두피를 1분간 꼼꼼히 마사지하며 씻어요.'),
+                  _stepRow('2', '영양·보습', '컨디셔너를 듬뿍 바르고 손가락으로 엉킨 머리를 풀어준 뒤 스퀴시(움켜쥐기)를 반복해요.'),
+                  _stepRow('3', '스타일링', '머리가 뚝뚝 젖은 상태에서 젤이나 컬 크림을 아래→위로 움켜쥐듯 발라요.'),
+                  _stepRow('4', '건조', '플로핑(면 티셔츠로 감싸기) 후 찬바람으로 말려요. 마른 머리에 빗질은 절대 금지!'),
+                  _stepRow('5', '마무리', '다 마른 후 굳은 젤 막을 손으로 살살 주물러 깨주면 부드러운 컬 완성!'),
+                ]),
+              ),
+              _GuideSection(
+                emoji: '🧴', title: '성분 가이드: 내 머리에 맞게 고르기',
+                color: const Color(0xFFE3F2FD),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  _ingredientRow('🫧 설페이트 계열\n(SLS, SLES)', '세정력이 강력해요. 기름기는 잘 빠지지만 곱슬머리를 건조하게 만들 수 있어요.'),
+                  _ingredientRow('🌿 설페이트-프리', '순하고 완만해요. 수분을 잘 지켜주지만 지성 두피엔 덜 씻긴 느낌이 들 수 있어요.'),
+                  _ingredientRow('⚡ 휘발성 알코올\n(에탄올 등)', '빨리 마르게 도와주지만 모발 수분을 함께 앗아갈 수 있어요.'),
+                  _ingredientRow('💧 보습형 알코올\n(세틸, 세테아릴)', '우리가 아는 알코올과 달라요! 모발을 부드럽게 코팅하고 수분을 가둬요.'),
+                  _ingredientRow('✨ 실리콘 (디메치콘)', '즉각적인 윤기를 줘요. 계속 쌓이면(빌드업) 수분·영양이 들어가는 길을 막을 수 있어요.'),
+                  _ingredientRow('💦 수분 성분\n(글리세린, 히알루론산)', '주변 수분을 끌어당겨 촉촉하게 해요. 습도가 높은 날엔 머리가 더 부풀 수도 있어요.'),
+                  _ingredientRow('🧬 단백질 성분\n(케라틴, 콜라겐)', '모발 빈틈을 채워 탄탄하게 만들어요. 손상 모발에 효과적이지만 과하면 뻣뻣해져요.'),
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(color: AppColors.tealLight, borderRadius: BorderRadius.circular(10)),
+                    child: Text(
+                      '💡 건조한 머리라면 → 보습형 알코올 + 설페이트-프리\n손상이 심하다면 → 단백질 성분 제품을 눈여겨보세요!',
+                      style: GoogleFonts.notoSansKr(fontSize: 13, color: AppColors.tealDark, height: 1.55),
+                    ),
+                  ),
+                ]),
+              ),
+              _GuideSection(
+                emoji: '📚', title: '곱슬 전문 용어집',
+                color: const Color(0xFFFCE4EC),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  _glossaryRow('코워시 (Co-wash)', '샴푸 대신 컨디셔너만으로 머리를 감는 세정법이에요.'),
+                  _glossaryRow('로우푸 (Low-poo)', '거품을 내는 강한 성분(설페이트)이 없는 순한 샴푸를 쓰는 방법이에요.'),
+                  _glossaryRow('리셋 워시 (Reset Wash)', 'CGM 시작 전, 쌓인 실리콘을 제거하기 위해 마지막으로 강한 샴푸를 쓰는 단계예요.'),
+                  _glossaryRow('리브인 (Leave-in)', '감은 후 씻어내지 않고 두어 수분을 유지하는 컨디셔너예요.'),
+                  _glossaryRow('LOC / LCO 메서드', '리브인(L) → 오일(O) → 크림(C) 순서로 겹겹이 수분을 가두는 방법이에요. LCO는 순서를 달리 해 더 촉촉하게 마무리해요.'),
+                  _glossaryRow('플로핑 (Plopping)', '수건 대신 면 티셔츠로 머리를 감싸 컬 모양을 잡으며 말리는 방법이에요.'),
+                  _glossaryRow('스퀴시 투 컨디쉬\n(Squish to Condish)', '컨디셔너를 바른 후 손으로 컬을 꽉꽉 움켜쥐어 수분을 밀어 넣는 기술이에요.'),
+                  _glossaryRow('공극률 (Porosity)', '모발이 수분을 흡수하고 내보내는 능력이에요.\n• 높음(손상): 구멍이 많아 수분이 금방 빠져요 → 단백질 팩 추천\n• 낮음(건강): 구멍이 적어 수분이 잘 안 들어요 → 가벼운 수분 제품 추천'),
+                  _glossaryRow('빌드업 (Build-up)', '실리콘·왁스 등이 모발에 쌓이는 현상이에요. 리셋 워시로 제거해요.'),
+                  _glossaryRow('딥 컨디셔닝 (DC)', '일반 컨디셔너보다 농도가 높은 팩을 사용해 집중 보습·영양을 공급하는 것이에요.'),
+                  _glossaryRow('프리즈 (Frizz)', '습기나 건조로 인해 머리카락이 부스스하게 일어나는 현상이에요.'),
+                  _glossaryRow('젤 캐스트 (Gel Cast)', '젤이 건조되면서 머리카락을 딱딱하게 감싸는 막이에요. 다 마른 후 손으로 깨주면 컬이 살아나요.'),
+                  _glossaryRow('스크런칭 (Scrunching)', '제품을 바를 때나 말릴 때 머리를 아래에서 위로 움켜쥐어 컬을 잡는 동작이에요.'),
+                  _glossaryRow('디퓨저 (Diffuser)', '드라이어에 부착하는 넓은 바람 분산 장치예요. 컬을 살리면서 빠르게 말릴 수 있어요.'),
+                ]),
+              ),
+            ]),
+          ),
         ]),
       ),
     );
   }
-}
 
-class _HistoryItem extends StatelessWidget {
-  final String date, typeId, title;
-  final Color color;
-  final bool isCurrent;
-  const _HistoryItem({required this.date, required this.typeId, required this.title, required this.color, required this.isCurrent});
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(bottom: 10),
-    child: Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: isCurrent ? color.withOpacity(0.1) : AppColors.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: isCurrent ? color.withOpacity(0.4) : Colors.transparent, width: 1.5),
+  Widget _guideText(String text) => Text(text, style: GoogleFonts.notoSansKr(fontSize: 13, color: AppColors.brownMid, height: 1.65));
+
+  Widget _typeRow(String code, String name, String desc) => Padding(
+    padding: const EdgeInsets.only(bottom: 12),
+    child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        decoration: BoxDecoration(color: AppColors.teal, borderRadius: BorderRadius.circular(6)),
+        child: Text(code, style: GoogleFonts.notoSansKr(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white)),
       ),
-      child: Row(children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(color: color.withOpacity(0.15), borderRadius: BorderRadius.circular(8)),
-          child: Text(typeId, style: GoogleFonts.notoSansKr(fontSize: 14, fontWeight: FontWeight.w800, color: color)),
-        ),
-        const SizedBox(width: 10),
-        Expanded(child: Text(title, style: GoogleFonts.notoSansKr(fontSize: 13, color: AppColors.brownMid))),
-        if (isCurrent)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-            decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(10)),
-            child: Text('현재', style: GoogleFonts.notoSansKr(fontSize: 10, fontWeight: FontWeight.w700, color: Colors.white)),
-          )
-        else
-          Text(date, style: GoogleFonts.notoSansKr(fontSize: 11, color: AppColors.brownLight)),
-      ]),
-    ),
+      const SizedBox(width: 10),
+      Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(name, style: GoogleFonts.notoSansKr(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.brown)),
+        const SizedBox(height: 2),
+        Text(desc, style: GoogleFonts.notoSansKr(fontSize: 12, color: AppColors.brownMid, height: 1.5)),
+      ])),
+    ]),
+  );
+
+  Widget _ruleRow(String icon, String title, String desc) => Padding(
+    padding: const EdgeInsets.only(bottom: 10),
+    child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Text(icon, style: const TextStyle(fontSize: 16)),
+      const SizedBox(width: 8),
+      Expanded(child: RichText(text: TextSpan(children: [
+        TextSpan(text: '$title  ', style: GoogleFonts.notoSansKr(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.brown)),
+        TextSpan(text: desc, style: GoogleFonts.notoSansKr(fontSize: 12, color: AppColors.brownMid)),
+      ]))),
+    ]),
+  );
+
+  Widget _stepRow(String num, String title, String desc) => Padding(
+    padding: const EdgeInsets.only(bottom: 14),
+    child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Container(
+        width: 24, height: 24,
+        decoration: const BoxDecoration(color: AppColors.peach, shape: BoxShape.circle),
+        child: Center(child: Text(num, style: GoogleFonts.notoSansKr(fontSize: 12, fontWeight: FontWeight.w800, color: Colors.white))),
+      ),
+      const SizedBox(width: 10),
+      Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(title, style: GoogleFonts.notoSansKr(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.brown)),
+        const SizedBox(height: 2),
+        Text(desc, style: GoogleFonts.notoSansKr(fontSize: 12, color: AppColors.brownMid, height: 1.5)),
+      ])),
+    ]),
+  );
+
+  Widget _ingredientRow(String name, String desc) => Padding(
+    padding: const EdgeInsets.only(bottom: 12),
+    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Text(name, style: GoogleFonts.notoSansKr(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.brown)),
+      const SizedBox(height: 2),
+      Text(desc, style: GoogleFonts.notoSansKr(fontSize: 12, color: AppColors.brownMid, height: 1.5)),
+    ]),
+  );
+
+  Widget _glossaryRow(String term, String def) => Padding(
+    padding: const EdgeInsets.only(bottom: 14),
+    child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Container(
+        width: 6, height: 6, margin: const EdgeInsets.only(top: 6, right: 8),
+        decoration: const BoxDecoration(color: AppColors.peach, shape: BoxShape.circle),
+      ),
+      Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(term, style: GoogleFonts.notoSansKr(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.brown)),
+        const SizedBox(height: 2),
+        Text(def, style: GoogleFonts.notoSansKr(fontSize: 12, color: AppColors.brownMid, height: 1.55)),
+      ])),
+    ]),
   );
 }
 
+class _GuideSection extends StatelessWidget {
+  final String emoji, title;
+  final Color color;
+  final Widget child;
+  const _GuideSection({required this.emoji, required this.title, required this.color, required this.child});
+
+  @override
+  Widget build(BuildContext context) => Container(
+    margin: const EdgeInsets.only(bottom: 10),
+    decoration: BoxDecoration(
+      color: color,
+      borderRadius: BorderRadius.circular(14),
+    ),
+    child: ExpansionTile(
+      tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      expandedCrossAxisAlignment: CrossAxisAlignment.start,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      collapsedShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      iconColor: AppColors.brown,
+      collapsedIconColor: AppColors.brownLight,
+      title: Text('$emoji  $title', style: GoogleFonts.notoSansKr(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.brown)),
+      children: [child],
+    ),
+  );
+}
 // ── 전체 루틴 모달 ──────────────────────────────────────────────────────────
 class _AllRoutinesModal extends StatelessWidget {
   const _AllRoutinesModal();

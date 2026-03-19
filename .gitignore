@@ -56,3 +56,6 @@ pubspec.lock
 
 #ignore prd.md
 prd.md
+
+# API 키 등 민감한 설정 파일
+lib/config/secrets.dart
