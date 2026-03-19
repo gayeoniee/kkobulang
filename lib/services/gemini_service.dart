@@ -60,7 +60,7 @@ class GeminiService {
 
   static Future<HairAnalysisResult> analyzeHair(Uint8List imageBytes) async {
     final model = GenerativeModel(
-      model: 'gemini-2.0-flash-lite',
+      model: 'gemini-2.5-flash',
       apiKey: geminiApiKey,
     );
 
