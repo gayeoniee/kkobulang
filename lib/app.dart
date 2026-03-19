@@ -88,7 +88,10 @@ class _RootState extends State<_Root> {
 
   void _skipTutorial() {
     GA.event('tutorial_skipped', {'at_step': _tutorialStep});
-    setState(() { _showTutorial = false; _tab = 0; });
+    setState(() {
+      _showTutorial = false;
+      _tab = 0;
+    });
   }
 
   @override
@@ -98,7 +101,8 @@ class _RootState extends State<_Root> {
     }
 
     final pages = [
-      HomePage(curlType: _curlType!, onNavigate: (i) => setState(() => _tab = i)),
+      HomePage(
+          curlType: _curlType!, onNavigate: (i) => setState(() => _tab = i)),
       ProductsPage(curlType: _curlType!),
       const DiaryPage(),
       CommunityPage(curlType: _curlType!),
@@ -114,15 +118,19 @@ class _RootState extends State<_Root> {
           appBar: AppBar(
             titleSpacing: 16,
             title: Row(mainAxisSize: MainAxisSize.min, children: [
-              Image.asset('assets/kkobulang_logo.png', height: 28, fit: BoxFit.contain),
+              Image.asset('assets/kkobulang_logo.png',
+                  height: 28, fit: BoxFit.contain),
               const SizedBox(width: 6),
               Transform.translate(
                 offset: const Offset(0, -4),
-                child: Image.asset('assets/kkobulang_green.png', height: 36, fit: BoxFit.contain),
+                child: Image.asset('assets/kkobulang_green.png',
+                    height: 36, fit: BoxFit.contain),
               ),
             ]),
             actions: [
-              IconButton(icon: const Icon(Icons.notifications_outlined), onPressed: () {}),
+              IconButton(
+                  icon: const Icon(Icons.notifications_outlined),
+                  onPressed: () {}),
               IconButton(icon: const Icon(Icons.search), onPressed: () {}),
             ],
           ),
@@ -132,23 +140,31 @@ class _RootState extends State<_Root> {
             onTap: _showTutorial ? null : (i) => setState(() => _tab = i),
             items: [
               BottomNavigationBarItem(
-                icon: Icon(_tab == 0 ? Icons.home_rounded : Icons.home_outlined),
+                icon:
+                    Icon(_tab == 0 ? Icons.home_rounded : Icons.home_outlined),
                 label: '홈',
               ),
               BottomNavigationBarItem(
-                icon: Icon(_tab == 1 ? Icons.grid_view_rounded : Icons.grid_view_outlined),
+                icon: Icon(_tab == 1
+                    ? Icons.grid_view_rounded
+                    : Icons.grid_view_outlined),
                 label: '제품',
               ),
               BottomNavigationBarItem(
-                icon: Icon(_tab == 2 ? Icons.book_rounded : Icons.book_outlined),
+                icon:
+                    Icon(_tab == 2 ? Icons.book_rounded : Icons.book_outlined),
                 label: '다이어리',
               ),
               BottomNavigationBarItem(
-                icon: Icon(_tab == 3 ? Icons.chat_bubble_rounded : Icons.chat_bubble_outline_rounded),
+                icon: Icon(_tab == 3
+                    ? Icons.chat_bubble_rounded
+                    : Icons.chat_bubble_outline_rounded),
                 label: '커뮤니티',
               ),
               BottomNavigationBarItem(
-                icon: Icon(_tab == 4 ? Icons.person_rounded : Icons.person_outline_rounded),
+                icon: Icon(_tab == 4
+                    ? Icons.person_rounded
+                    : Icons.person_outline_rounded),
                 label: '프로필',
               ),
             ],
@@ -184,7 +200,7 @@ const _tutorialSteps = [
     tab: 2,
     icon: '📓',
     title: '헤어 다이어리',
-    desc: '매일의 헤어 루틴을 기록하고 계절별 변화를 추적할 수 있어요!',
+    desc: '나의 헤어 루틴을 기록하고 계절별 변화를 추적할 수 있어요!',
   ),
   (
     tab: 3,
@@ -205,7 +221,11 @@ class _TutorialOverlay extends StatelessWidget {
   final VoidCallback onNext;
   final VoidCallback onPrev;
   final VoidCallback onSkip;
-  const _TutorialOverlay({required this.step, required this.onNext, required this.onPrev, required this.onSkip});
+  const _TutorialOverlay(
+      {required this.step,
+      required this.onNext,
+      required this.onPrev,
+      required this.onSkip});
 
   @override
   Widget build(BuildContext context) {
@@ -244,7 +264,8 @@ class _TutorialOverlay extends StatelessWidget {
         ),
         // 말풍선 카드 (네비바 위에 위치)
         Positioned(
-          left: 16, right: 16,
+          left: 16,
+          right: 16,
           bottom: totalNavH + 16,
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -256,64 +277,89 @@ class _TutorialOverlay extends StatelessWidget {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
-                    BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 20, offset: const Offset(0, 4)),
+                    BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.15),
+                        blurRadius: 20,
+                        offset: const Offset(0, 4)),
                   ],
                 ),
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Row(children: [
-                    Text(s.icon, style: const TextStyle(fontSize: 28)),
-                    const SizedBox(width: 10),
-                    Text(s.title,
-                      style: GoogleFonts.notoSansKr(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.brown)),
-                    const Spacer(),
-                    GestureDetector(
-                      onTap: onSkip,
-                      child: Text('건너뛰기',
-                        style: GoogleFonts.notoSansKr(fontSize: 12, color: AppColors.brownLight)),
-                    ),
-                  ]),
-                  const SizedBox(height: 10),
-                  Text(s.desc,
-                    style: GoogleFonts.notoSansKr(fontSize: 14, color: AppColors.brownMid, height: 1.55)),
-                  const SizedBox(height: 16),
-                  Row(children: [
-                    // 스텝 인디케이터
-                    Row(children: List.generate(_tutorialSteps.length, (i) => Container(
-                      margin: const EdgeInsets.only(right: 5),
-                      width: i == step ? 16 : 6,
-                      height: 6,
-                      decoration: BoxDecoration(
-                        color: i == step ? AppColors.peach : AppColors.surface,
-                        borderRadius: BorderRadius.circular(3),
-                      ),
-                    ))),
-                    const Spacer(),
-                    if (!isFirst) ...[
-                      OutlinedButton(
-                        onPressed: onPrev,
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: AppColors.peach),
-                          foregroundColor: AppColors.peach,
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(children: [
+                        Text(s.icon, style: const TextStyle(fontSize: 28)),
+                        const SizedBox(width: 10),
+                        Text(s.title,
+                            style: GoogleFonts.notoSansKr(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.brown)),
+                        const Spacer(),
+                        GestureDetector(
+                          onTap: onSkip,
+                          child: Text('건너뛰기',
+                              style: GoogleFonts.notoSansKr(
+                                  fontSize: 12, color: AppColors.brownLight)),
                         ),
-                        child: Text('← 이전',
-                          style: GoogleFonts.notoSansKr(fontSize: 13, fontWeight: FontWeight.w700)),
-                      ),
-                      const SizedBox(width: 8),
-                    ],
-                    ElevatedButton(
-                      onPressed: onNext,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.peach,
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      child: Text(isLast ? '시작하기 🌿' : '다음 →',
-                        style: GoogleFonts.notoSansKr(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white)),
-                    ),
-                  ]),
-                ]),
+                      ]),
+                      const SizedBox(height: 10),
+                      Text(s.desc,
+                          style: GoogleFonts.notoSansKr(
+                              fontSize: 14,
+                              color: AppColors.brownMid,
+                              height: 1.55)),
+                      const SizedBox(height: 16),
+                      Row(children: [
+                        // 스텝 인디케이터
+                        Row(
+                            children: List.generate(
+                                _tutorialSteps.length,
+                                (i) => Container(
+                                      margin: const EdgeInsets.only(right: 5),
+                                      width: i == step ? 16 : 6,
+                                      height: 6,
+                                      decoration: BoxDecoration(
+                                        color: i == step
+                                            ? AppColors.peach
+                                            : AppColors.surface,
+                                        borderRadius: BorderRadius.circular(3),
+                                      ),
+                                    ))),
+                        const Spacer(),
+                        if (!isFirst) ...[
+                          OutlinedButton(
+                            onPressed: onPrev,
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: AppColors.peach),
+                              foregroundColor: AppColors.peach,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 10),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12)),
+                            ),
+                            child: Text('← 이전',
+                                style: GoogleFonts.notoSansKr(
+                                    fontSize: 13, fontWeight: FontWeight.w700)),
+                          ),
+                          const SizedBox(width: 8),
+                        ],
+                        ElevatedButton(
+                          onPressed: onNext,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.peach,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 10),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
+                          ),
+                          child: Text(isLast ? '시작하기 🌿' : '다음 →',
+                              style: GoogleFonts.notoSansKr(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white)),
+                        ),
+                      ]),
+                    ]),
               ),
               // 아래 삼각형 화살표
               CustomPaint(
@@ -332,14 +378,15 @@ class _TutorialOverlay extends StatelessWidget {
 
 class _SpotlightPainter extends CustomPainter {
   final double navItemX, navItemY, radius;
-  const _SpotlightPainter({required this.navItemX, required this.navItemY, required this.radius});
+  const _SpotlightPainter(
+      {required this.navItemX, required this.navItemY, required this.radius});
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..color = Colors.black.withValues(alpha: 0.65);
-    final path = Path()
-      ..addRect(Rect.fromLTWH(0, 0, size.width, size.height));
-    path.addOval(Rect.fromCircle(center: Offset(navItemX, navItemY), radius: radius));
+    final path = Path()..addRect(Rect.fromLTWH(0, 0, size.width, size.height));
+    path.addOval(
+        Rect.fromCircle(center: Offset(navItemX, navItemY), radius: radius));
     path.fillType = PathFillType.evenOdd;
     canvas.drawPath(path, paint);
 
