@@ -127,6 +127,35 @@ class AppBottomSheet extends StatelessWidget {
   }
 }
 
+/// 네트워크 이미지 + 이모지 fallback
+class NetImg extends StatelessWidget {
+  final String? url;
+  final String fallback;
+  final double? width, height;
+  final BoxFit fit;
+  final BorderRadius? borderRadius;
+  const NetImg({super.key, required this.url, required this.fallback, this.width, this.height, this.fit = BoxFit.cover, this.borderRadius});
+
+  @override
+  Widget build(BuildContext context) {
+    if (url == null) return Center(child: Text(fallback, style: TextStyle(fontSize: (height ?? 40) * 0.45)));
+    final img = Image.network(
+      url!,
+      width: width, height: height, fit: fit,
+      loadingBuilder: (_, child, progress) => progress == null ? child
+          : Container(color: AppColors.surface, child: const Center(child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.peach))),
+      errorBuilder: (_, __, ___) => Container(
+        color: AppColors.surface,
+        child: Center(child: Text(fallback, style: TextStyle(fontSize: (height ?? 40) * 0.45))),
+      ),
+    );
+    if (borderRadius != null) {
+      return ClipRRect(borderRadius: borderRadius!, child: img);
+    }
+    return img;
+  }
+}
+
 Widget buildPrimaryButton(String label, VoidCallback? onPressed) {
   return SizedBox(
     width: double.infinity,

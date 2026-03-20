@@ -167,10 +167,9 @@ class _DiaryCard extends StatelessWidget {
       ])),
       if (entry.hasPhoto) ...[
         const SizedBox(width: 10),
-        Container(
-          width: 56, height: 56,
-          decoration: BoxDecoration(color: AppColors.peachLight, borderRadius: BorderRadius.circular(10)),
-          child: const Center(child: Text('📸', style: TextStyle(fontSize: 22))),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: NetImg(url: entry.imageUrl, fallback: '📸', width: 56, height: 56),
         ),
       ],
     ]));
@@ -213,7 +212,9 @@ class _DiaryFormState extends State<_DiaryForm> {
       ? p.name.contains(_searchProduct!) || p.brand.contains(_searchProduct!)
       : false).toList();
 
-    return AppBottomSheet(
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.88),
+      child: AppBottomSheet(
       child: Column(mainAxisSize: MainAxisSize.min, children: [
         Flexible(child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
@@ -407,6 +408,6 @@ class _DiaryFormState extends State<_DiaryForm> {
           ]),
         ),
       ]),
-    );
+    ));
   }
 }

@@ -590,9 +590,9 @@ class _AllProductsModal extends StatelessWidget {
                 decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14),
                   boxShadow: const [BoxShadow(color: Color(0x143D2B1F), blurRadius: 6, offset: Offset(0,2))]),
                 child: Row(children: [
-                  Container(width: 56, height: 56,
-                    decoration: BoxDecoration(color: AppColors.peachLight, borderRadius: BorderRadius.circular(10)),
-                    child: Center(child: Text(p.img, style: const TextStyle(fontSize: 28)))),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: NetImg(url: p.imageUrl, fallback: p.img, width: 56, height: 56)),
                   const SizedBox(width: 12),
                   Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Text(p.brand, style: GoogleFonts.notoSansKr(fontSize: 10, color: AppColors.brownLight)),
@@ -673,10 +673,9 @@ class _DiaryPreviewCard extends StatelessWidget {
           ])),
           if (entry.hasPhoto) ...[
             const SizedBox(width: 12),
-            Container(
-              width: 60, height: 60, decoration: BoxDecoration(
-                color: AppColors.peachLight, borderRadius: BorderRadius.circular(10)),
-              child: const Center(child: Text('📸', style: TextStyle(fontSize: 24))),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: NetImg(url: entry.imageUrl, fallback: '📸', width: 60, height: 60),
             ),
           ],
         ]),
@@ -694,9 +693,9 @@ class _ProductMiniCard extends StatelessWidget {
     decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14),
       boxShadow: const [BoxShadow(color: Color(0x143D2B1F), blurRadius: 8, offset: Offset(0, 2))]),
     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Container(height: 72, width: double.infinity,
-        decoration: BoxDecoration(color: AppColors.peachLight, borderRadius: BorderRadius.circular(10)),
-        child: Center(child: Text(product.img, style: const TextStyle(fontSize: 34)))),
+      ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: NetImg(url: product.imageUrl, fallback: product.img, width: double.infinity, height: 72)),
       const SizedBox(height: 8),
       Text(product.brand, style: GoogleFonts.notoSansKr(fontSize: 10, color: AppColors.brownLight)),
       const SizedBox(height: 2),

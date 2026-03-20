@@ -109,9 +109,9 @@ class _ProductCard extends StatelessWidget {
       decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16),
         boxShadow: const [BoxShadow(color: Color(0x143D2B1F), blurRadius: 8, offset: Offset(0, 2))]),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Container(width: double.infinity, height: 90,
-          decoration: BoxDecoration(color: AppColors.peachLight, borderRadius: BorderRadius.circular(12)),
-          child: Center(child: Text(product.img, style: const TextStyle(fontSize: 40)))),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: NetImg(url: product.imageUrl, fallback: product.img, width: double.infinity, height: 90)),
         const SizedBox(height: 8),
         Text(product.brand, style: GoogleFonts.notoSansKr(fontSize: 10, color: AppColors.brownLight)),
         const SizedBox(height: 2),
@@ -174,10 +174,9 @@ class _ProductDetailPageState extends State<_ProductDetailPage> with SingleTicke
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             // Image + basic info row
             Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Container(
-                width: 100, height: 100,
-                decoration: BoxDecoration(color: AppColors.peachLight, borderRadius: BorderRadius.circular(16)),
-                child: Center(child: Text(p.img, style: const TextStyle(fontSize: 52)))),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: NetImg(url: p.imageUrl, fallback: p.img, width: 100, height: 100)),
               const SizedBox(width: 14),
               Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 if (isMatch)

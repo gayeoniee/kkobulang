@@ -514,13 +514,9 @@ class _PostCardState extends State<_PostCard> {
 
         if (post.hasImage) ...[
           const SizedBox(height: 10),
-          Container(
-            width: double.infinity, height: 120,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(colors: [AppColors.peachLight, AppColors.tealLight]),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Center(child: Text('📸', style: TextStyle(fontSize: 36))),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: NetImg(url: post.imageUrl, fallback: '📸', width: double.infinity, height: 180),
           ),
         ],
 
@@ -663,7 +659,9 @@ class _PostFormState extends State<_PostForm> {
 
   @override
   Widget build(BuildContext context) {
-    return AppBottomSheet(
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.88),
+      child: AppBottomSheet(
       child: Column(mainAxisSize: MainAxisSize.min, children: [
         Flexible(child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
@@ -798,6 +796,6 @@ class _PostFormState extends State<_PostForm> {
           ),
         ),
       ]),
-    );
+    ));
   }
 }
