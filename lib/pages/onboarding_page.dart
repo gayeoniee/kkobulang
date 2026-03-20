@@ -468,24 +468,96 @@ class _MethodCard extends StatelessWidget {
 }
 
 // ── Analyzing Screen ───────────────────────────────────────────────────────
-class _AnalyzingScreen extends StatelessWidget {
+class _AnalyzingScreen extends StatefulWidget {
   const _AnalyzingScreen({super.key});
+  @override
+  State<_AnalyzingScreen> createState() => _AnalyzingScreenState();
+}
+
+class _AnalyzingScreenState extends State<_AnalyzingScreen> {
+  static const _tips = [
+    ('LOC 메서드 💧', '리브인(L) → 오일(O) → 크림(C) 순서로\n수분을 겹겹이 가두는 방법이에요.'),
+    ('플로핑 (Plopping) 👕', '면 티셔츠로 젖은 머리를 감싸\n컬 모양을 살리며 말리는 기술이에요.'),
+    ('다공성 (Porosity) 🕳️', '모발이 수분을 흡수·유지하는 능력이에요.\n저/중/고에 따라 케어법이 달라요.'),
+    ('스퀴시 투 컨디쉬 🤲', '컨디셔너를 바른 채 손으로 꽉꽉 눌러\n수분을 밀어넣는 기술이에요.'),
+    ('딥컨디셔닝 ✨', '영양 마스크를 10~30분 두어\n모발 속 수분을 채우는 집중 케어예요.'),
+    ('디퓨저 건조 💨', '헤어드라이어 전용 디퓨저로\n컬이 살아있게 건조하는 방법이에요.'),
+    ('CGM 🌿', '설페이트·실리콘 없는 제품으로\n컬을 살리는 Curly Girl Method예요.'),
+    ('리브인 컨디셔너 💚', '헹구지 않고 두어\n종일 수분을 유지시키는 컨디셔너예요.'),
+  ];
+
+  int _index = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.doWhile(() async {
+      await Future.delayed(const Duration(seconds: 3));
+      if (!mounted) return false;
+      setState(() => _index = (_index + 1) % _tips.length);
+      return true;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    final (title, desc) = _tips[_index];
     return Container(
       decoration: const BoxDecoration(gradient: LinearGradient(
         begin: Alignment.topCenter, end: Alignment.bottomCenter,
         colors: [AppColors.cream, AppColors.peachLight])),
-      child: Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
-        Image.asset('assets/kkobulang_sun.png', width: 100),
-        const SizedBox(height: 24),
-        const CircularProgressIndicator(color: AppColors.peach, strokeWidth: 3),
-        const SizedBox(height: 20),
-        Text('AI가 머리카락을 분석하고 있어요...', style: GoogleFonts.notoSansKr(fontSize: 15, color: AppColors.brown, fontWeight: FontWeight.w600)),
-        const SizedBox(height: 8),
-        Text('잠시만 기다려주세요 🌿', style: GoogleFonts.notoSansKr(fontSize: 13, color: AppColors.brownMid)),
-      ])),
+      child: Center(child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Image.asset('assets/kkobulang_sun.png', width: 90),
+          const SizedBox(height: 20),
+          Text('AI가 머리카락을 분석하고 있어요...', style: GoogleFonts.notoSansKr(fontSize: 15, color: AppColors.brown, fontWeight: FontWeight.w600)),
+          const SizedBox(height: 6),
+          const CircularProgressIndicator(color: AppColors.peach, strokeWidth: 3),
+          const SizedBox(height: 28),
+          // 용어 슬라이드 카드
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 400),
+            transitionBuilder: (child, anim) => FadeTransition(
+              opacity: anim,
+              child: SlideTransition(
+                position: Tween(begin: const Offset(0.15, 0), end: Offset.zero).animate(anim),
+                child: child,
+              ),
+            ),
+            child: Container(
+              key: ValueKey(_index),
+              width: double.infinity,
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(18),
+                boxShadow: [BoxShadow(color: AppColors.peach.withValues(alpha: 0.15), blurRadius: 12, offset: const Offset(0, 4))],
+              ),
+              child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('잠깐! 꼬불 용어 알고 가기 📚', style: GoogleFonts.notoSansKr(fontSize: 11, color: AppColors.peach, fontWeight: FontWeight.w700)),
+                const SizedBox(height: 8),
+                Text(title, style: GoogleFonts.notoSansKr(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.brown)),
+                const SizedBox(height: 6),
+                Text(desc, style: GoogleFonts.notoSansKr(fontSize: 13, color: AppColors.brownMid, height: 1.6)),
+              ]),
+            ),
+          ),
+          const SizedBox(height: 14),
+          // 도트 인디케이터
+          Row(mainAxisAlignment: MainAxisAlignment.center, children: List.generate(_tips.length, (i) =>
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 250),
+              width: i == _index ? 16 : 6, height: 6,
+              margin: const EdgeInsets.only(right: 4),
+              decoration: BoxDecoration(
+                color: i == _index ? AppColors.peach : AppColors.peach.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(3),
+              ),
+            ),
+          )),
+        ]),
+      )),
     );
   }
 }

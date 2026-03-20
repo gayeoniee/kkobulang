@@ -664,9 +664,10 @@ class _PostFormState extends State<_PostForm> {
   @override
   Widget build(BuildContext context) {
     return AppBottomSheet(
-      child: SingleChildScrollView(
-        padding: EdgeInsets.fromLTRB(20, 8, 20, MediaQuery.of(context).viewInsets.bottom + 24),
-        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+      child: Column(mainAxisSize: MainAxisSize.min, children: [
+        Flexible(child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text('새 게시글 작성',
             style: GoogleFonts.notoSansKr(fontSize: 17, fontWeight: FontWeight.w700, color: AppColors.brown)),
           const SizedBox(height: 16),
@@ -767,11 +768,13 @@ class _PostFormState extends State<_PostForm> {
                   fontWeight: _hasPhoto ? FontWeight.w600 : FontWeight.w400)),
             ]),
           ),
-          const SizedBox(height: 20),
-
-          ListenableBuilder(
-            listenable: Listenable.merge([_titleCtrl, _contentCtrl]),
-            builder: (_, __) => Row(children: [
+          const SizedBox(height: 8),
+        ]))),
+        ListenableBuilder(
+          listenable: Listenable.merge([_titleCtrl, _contentCtrl]),
+          builder: (_, __) => Padding(
+            padding: EdgeInsets.fromLTRB(20, 8, 20, MediaQuery.of(context).viewInsets.bottom + 20),
+            child: Row(children: [
               Expanded(child: OutlinedButton(
                 onPressed: () => Navigator.pop(context),
                 style: OutlinedButton.styleFrom(
@@ -793,8 +796,8 @@ class _PostFormState extends State<_PostForm> {
               )),
             ]),
           ),
-        ]),
-      ),
+        ),
+      ]),
     );
   }
 }

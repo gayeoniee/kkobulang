@@ -47,6 +47,7 @@ class _RootState extends State<_Root> {
   String? _curlType;
   int _tab = 0;
   bool _showTutorial = false;
+  bool _showGuideHint = false;
   int _tutorialStep = 0;
 
   void _onComplete(String type) {
@@ -72,6 +73,7 @@ class _RootState extends State<_Root> {
       GA.event('tutorial_completed');
       setState(() {
         _showTutorial = false;
+        _showGuideHint = true;
         _tab = 0;
       });
     }
@@ -90,6 +92,7 @@ class _RootState extends State<_Root> {
     GA.event('tutorial_skipped', {'at_step': _tutorialStep});
     setState(() {
       _showTutorial = false;
+      _showGuideHint = true;
       _tab = 0;
     });
   }
@@ -102,7 +105,10 @@ class _RootState extends State<_Root> {
 
     final pages = [
       HomePage(
-          curlType: _curlType!, onNavigate: (i) => setState(() => _tab = i)),
+          curlType: _curlType!,
+          onNavigate: (i) => setState(() => _tab = i),
+          showGuideHint: _showGuideHint,
+          onGuideHintDismissed: () => setState(() => _showGuideHint = false)),
       ProductsPage(curlType: _curlType!),
       const DiaryPage(),
       CommunityPage(curlType: _curlType!),

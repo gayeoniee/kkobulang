@@ -3,15 +3,38 @@ import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_theme.dart';
 import '../data/seed_data.dart';
 import '../models/models.dart';
-import '../models/diagnosis_history.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/diagnosis_widgets.dart';
 import '../services/analytics.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   final String curlType;
   final void Function(int) onNavigate;
-  const HomePage({super.key, required this.curlType, required this.onNavigate});
+  final bool showGuideHint;
+  final VoidCallback? onGuideHintDismissed;
+  const HomePage({super.key, required this.curlType, required this.onNavigate, this.showGuideHint = false, this.onGuideHintDismissed});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
+  late AnimationController _pulseCtrl;
+  late Animation<double> _pulseAnim;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 900))
+      ..repeat(reverse: true);
+    _pulseAnim = Tween(begin: 1.0, end: 1.04).animate(CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut));
+  }
+
+  @override
+  void dispose() {
+    _pulseCtrl.dispose();
+    super.dispose();
+  }
 
   static String _weatherTip() {
     final m = DateTime.now().month;
@@ -41,7 +64,7 @@ class HomePage extends StatelessWidget {
     GA.event('products_all_viewed');
     showModalBottomSheet(
       context: context, isScrollControlled: true, backgroundColor: Colors.transparent,
-      builder: (_) => _AllProductsModal(curlType: curlType, recProducts: recProducts),
+      builder: (_) => _AllProductsModal(curlType: widget.curlType, recProducts: recProducts),
     );
   }
 
@@ -63,9 +86,9 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final typeInfo = curlTypes.firstWhere((t) => t.id == curlType, orElse: () => curlTypes[4]);
-    final typeColor = AppColors.curlTypeColor(curlType);
-    final recProducts = products.where((p) => p.types.contains(curlType)).take(5).toList();
+    final typeInfo = curlTypes.firstWhere((t) => t.id == widget.curlType, orElse: () => curlTypes[4]);
+    final typeColor = AppColors.curlTypeColor(widget.curlType);
+    final recProducts = products.where((p) => p.types.contains(widget.curlType)).take(5).toList();
     final latestDiary = diaryEntries.isNotEmpty ? diaryEntries.first : null;
 
     return CustomScrollView(slivers: [
@@ -102,7 +125,7 @@ class HomePage extends StatelessWidget {
                     ),
                   ]),
                   const SizedBox(height: 4),
-                  CurlTypeBadge(curlType, large: true),
+                  CurlTypeBadge(widget.curlType, large: true),
                 ])),
                 // 이미지 분석 + 이력 버튼
                 Row(mainAxisSize: MainAxisSize.min, children: [
@@ -127,23 +150,35 @@ class HomePage extends StatelessWidget {
           const SizedBox(height: 16),
 
           // ── 꼬불랑 입문가이드 ──
-          GestureDetector(
-            onTap: () => _showGuideModal(context),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(colors: [AppColors.teal, AppColors.tealDark]),
-                borderRadius: BorderRadius.circular(14),
+          ScaleTransition(
+            scale: widget.showGuideHint ? _pulseAnim : const AlwaysStoppedAnimation(1.0),
+            child: GestureDetector(
+              onTap: () {
+                widget.onGuideHintDismissed?.call();
+                _showGuideModal(context);
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(colors: [AppColors.teal, AppColors.tealDark]),
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: widget.showGuideHint
+                      ? [BoxShadow(color: AppColors.teal.withValues(alpha: 0.5), blurRadius: 14, spreadRadius: 2)]
+                      : null,
+                ),
+                child: Row(children: [
+                  const Text('📖', style: TextStyle(fontSize: 22)),
+                  const SizedBox(width: 10),
+                  Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text('꼬불랑 입문가이드', style: GoogleFonts.notoSansKr(fontSize: 14, fontWeight: FontWeight.w800, color: Colors.white)),
+                    Text(
+                      widget.showGuideHint ? '👆 여기서 시작해보세요!' : '곱슬 케어 처음이라면? 여기서 시작해요',
+                      style: GoogleFonts.notoSansKr(fontSize: 11, color: Colors.white.withValues(alpha: 0.9)),
+                    ),
+                  ])),
+                  const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 16),
+                ]),
               ),
-              child: Row(children: [
-                const Text('📖', style: TextStyle(fontSize: 22)),
-                const SizedBox(width: 10),
-                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text('꼬불랑 입문가이드', style: GoogleFonts.notoSansKr(fontSize: 14, fontWeight: FontWeight.w800, color: Colors.white)),
-                  Text('곱슬 케어 처음이라면? 여기서 시작해요', style: GoogleFonts.notoSansKr(fontSize: 11, color: Colors.white.withOpacity(0.85))),
-                ])),
-                const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 16),
-              ]),
             ),
           ),
           const SizedBox(height: 20),
@@ -152,20 +187,20 @@ class HomePage extends StatelessWidget {
           Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
             Text('📓 헤어 다이어리', style: GoogleFonts.notoSansKr(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.brown)),
             GestureDetector(
-              onTap: () => onNavigate(2),
+              onTap: () => widget.onNavigate(2),
               child: Text('전체보기', style: GoogleFonts.notoSansKr(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.teal)),
             ),
           ]),
           const SizedBox(height: 10),
           if (latestDiary == null)
-            _EmptyDiaryCard(onTap: () => onNavigate(2))
+            _EmptyDiaryCard(onTap: () => widget.onNavigate(2))
           else
-            _DiaryPreviewCard(entry: latestDiary, onTap: () => onNavigate(2)),
+            _DiaryPreviewCard(entry: latestDiary, onTap: () => widget.onNavigate(2)),
           const SizedBox(height: 8),
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
-              onPressed: () => onNavigate(2),
+              onPressed: () => widget.onNavigate(2),
               icon: const Icon(Icons.edit_rounded, size: 16, color: AppColors.teal),
               label: Text('오늘 루틴 기록하기', style: GoogleFonts.notoSansKr(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.teal)),
               style: OutlinedButton.styleFrom(

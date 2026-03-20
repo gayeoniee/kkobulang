@@ -214,9 +214,10 @@ class _DiaryFormState extends State<_DiaryForm> {
       : false).toList();
 
     return AppBottomSheet(
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(20, 8, 20, MediaQuery.of(context).viewInsets.bottom + 24),
-        child: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+      child: Column(mainAxisSize: MainAxisSize.min, children: [
+        Flexible(child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text('오늘의 헤어 기록 ✍️', style: GoogleFonts.notoSansKr(fontSize: 17, fontWeight: FontWeight.w800, color: AppColors.brown)),
           const SizedBox(height: 18),
 
@@ -383,9 +384,11 @@ class _DiaryFormState extends State<_DiaryForm> {
             controller: _memoCtrl, maxLines: 3,
             decoration: const InputDecoration(hintText: '오늘의 느낌을 자유롭게 적어봐요 🌿'),
           ),
-          const SizedBox(height: 20),
-
-          Row(children: [
+          const SizedBox(height: 8),
+        ]))),
+        Padding(
+          padding: EdgeInsets.fromLTRB(20, 8, 20, MediaQuery.of(context).viewInsets.bottom + 20),
+          child: Row(children: [
             Expanded(child: OutlinedButton(
               onPressed: () => Navigator.pop(context),
               style: OutlinedButton.styleFrom(side: const BorderSide(color: AppColors.peach), foregroundColor: AppColors.peachDark, shape: const StadiumBorder(), padding: const EdgeInsets.symmetric(vertical: 14)),
@@ -402,8 +405,8 @@ class _DiaryFormState extends State<_DiaryForm> {
               child: Text('저장하기 ✨', style: GoogleFonts.notoSansKr(fontWeight: FontWeight.w700, color: Colors.white)),
             )),
           ]),
-        ])),
-      ),
+        ),
+      ]),
     );
   }
 }
