@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import '../theme/app_theme.dart';
 import '../data/seed_data.dart';
 import '../models/models.dart';
 import '../services/analytics.dart';
+import '../services/gemini_service.dart';
 
 // ── Survey question model ──────────────────────────────────────────────────
 class _Q {
@@ -90,10 +92,13 @@ class OnboardingPage extends StatefulWidget {
 }
 
 class _OnboardingPageState extends State<OnboardingPage> {
-  // 0=splash, 1=welcome, 2=gender, 3-10=survey Q0-Q7, 11=result
+  // 0=splash, 1=welcome, 2=gender, 12=method choice, 3-10=survey Q0-Q7, 11=result
   int _step = 0;
   final Map<int, dynamic> _ans = {};
   String? _gender;
+  String? _forcedCurlType; // set by image analysis path
+  bool _analyzing = false;
+  String? _analyzeError;
 
   @override
   void initState() {
@@ -104,7 +109,26 @@ class _OnboardingPageState extends State<OnboardingPage> {
     });
   }
 
-  String get _curlType => (_ans[0] as String?) ?? '3B';
+  String get _curlType => _forcedCurlType ?? (_ans[0] as String?) ?? '3B';
+
+  Future<void> _startImageAnalysis() async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(source: ImageSource.gallery, imageQuality: 85);
+    if (picked == null) return;
+    setState(() { _analyzing = true; _analyzeError = null; });
+    try {
+      final bytes = await picked.readAsBytes();
+      final result = await GeminiService.analyzeHair(bytes);
+      GA.event('image_analysis_completed', {'curl_type': result.overallType});
+      setState(() {
+        _forcedCurlType = result.overallType;
+        _analyzing = false;
+        _step = 11;
+      });
+    } catch (e) {
+      setState(() { _analyzing = false; _analyzeError = e.toString(); });
+    }
+  }
 
   void _next() {
     if (_step < 10) {
@@ -146,8 +170,16 @@ class _OnboardingPageState extends State<OnboardingPage> {
           1 => _WelcomeScreen(key: const ValueKey('welcome'), onNext: () => setState(() => _step = 2)),
           2 => _GenderScreen(key: const ValueKey('gender'), onSelect: (g) {
               GA.event('gender_selected', {'gender': g});
-              setState(() { _gender = g; _step = 3; });
+              setState(() { _gender = g; _step = 12; });
             }),
+          12 => _analyzing
+              ? _AnalyzingScreen(key: const ValueKey('analyzing'))
+              : _MethodChoiceScreen(
+                  key: const ValueKey('method_choice'),
+                  error: _analyzeError,
+                  onSurvey: () => setState(() { _analyzeError = null; _step = 3; }),
+                  onImage: _startImageAnalysis,
+                ),
           11 => _ResultScreen(key: const ValueKey('result'), curlType: _curlType, answers: _ans, gender: _gender, onComplete: (type) {
               GA.event('onboarding_completed', {'curl_type': type});
               widget.onComplete(type);
@@ -331,6 +363,129 @@ class _GenderCard extends StatelessWidget {
       ),
     ),
   );
+}
+
+// ── Method Choice ─────────────────────────────────────────────────────────
+class _MethodChoiceScreen extends StatelessWidget {
+  final VoidCallback onSurvey;
+  final VoidCallback onImage;
+  final String? error;
+  const _MethodChoiceScreen({super.key, required this.onSurvey, required this.onImage, this.error});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(gradient: LinearGradient(
+        begin: Alignment.topCenter, end: Alignment.bottomCenter,
+        colors: [AppColors.cream, AppColors.peachLight])),
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(28, 0, 28, 40),
+          child: Column(children: [
+            const SizedBox(height: 40),
+            Image.asset('assets/kkobulang_logo.png', width: 120),
+            const SizedBox(height: 32),
+            Text('유형을 어떻게 알아볼까요?',
+              style: GoogleFonts.notoSansKr(fontSize: 24, fontWeight: FontWeight.w800, color: AppColors.brown)),
+            const SizedBox(height: 10),
+            Text('나에게 맞는 방법을 선택해주세요',
+              style: GoogleFonts.notoSansKr(fontSize: 14, color: AppColors.brownMid)),
+            const SizedBox(height: 48),
+            _MethodCard(
+              icon: '📋',
+              title: '설문으로 분석하기',
+              desc: '8가지 질문으로\n내 곱슬 유형을 정확히 파악해요',
+              onTap: onSurvey,
+              primary: false,
+            ),
+            const SizedBox(height: 16),
+            _MethodCard(
+              icon: '📸',
+              title: '이미지로 빠르게 분석하기',
+              desc: '사진 한 장으로\nAI가 즉시 유형을 분석해줘요',
+              onTap: onImage,
+              primary: true,
+            ),
+            if (error != null) ...[
+              const SizedBox(height: 20),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.red.shade200),
+                ),
+                child: Text('분석 중 오류가 발생했어요. 다시 시도해주세요.\n$error',
+                  style: GoogleFonts.notoSansKr(fontSize: 12, color: Colors.red.shade700)),
+              ),
+            ],
+            const Spacer(),
+          ]),
+        ),
+      ),
+    );
+  }
+}
+
+class _MethodCard extends StatelessWidget {
+  final String icon, title, desc;
+  final VoidCallback onTap;
+  final bool primary;
+  const _MethodCard({required this.icon, required this.title, required this.desc, required this.onTap, required this.primary});
+
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+    onTap: onTap,
+    child: Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(22),
+      decoration: BoxDecoration(
+        color: primary ? AppColors.peach : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [BoxShadow(
+          color: (primary ? AppColors.peach : AppColors.brown).withValues(alpha: 0.18),
+          blurRadius: 14, offset: const Offset(0, 4))],
+      ),
+      child: Row(children: [
+        Text(icon, style: const TextStyle(fontSize: 36)),
+        const SizedBox(width: 16),
+        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(title, style: GoogleFonts.notoSansKr(
+            fontSize: 16, fontWeight: FontWeight.w800,
+            color: primary ? Colors.white : AppColors.brown)),
+          const SizedBox(height: 4),
+          Text(desc, style: GoogleFonts.notoSansKr(
+            fontSize: 13, color: primary ? Colors.white.withValues(alpha: 0.85) : AppColors.brownMid,
+            height: 1.5)),
+        ])),
+        Icon(Icons.arrow_forward_ios_rounded, size: 18,
+          color: primary ? Colors.white.withValues(alpha: 0.8) : AppColors.brownLight),
+      ]),
+    ),
+  );
+}
+
+// ── Analyzing Screen ───────────────────────────────────────────────────────
+class _AnalyzingScreen extends StatelessWidget {
+  const _AnalyzingScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(gradient: LinearGradient(
+        begin: Alignment.topCenter, end: Alignment.bottomCenter,
+        colors: [AppColors.cream, AppColors.peachLight])),
+      child: Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
+        Image.asset('assets/kkobulang_sun.png', width: 100),
+        const SizedBox(height: 24),
+        const CircularProgressIndicator(color: AppColors.peach, strokeWidth: 3),
+        const SizedBox(height: 20),
+        Text('AI가 머리카락을 분석하고 있어요...', style: GoogleFonts.notoSansKr(fontSize: 15, color: AppColors.brown, fontWeight: FontWeight.w600)),
+        const SizedBox(height: 8),
+        Text('잠시만 기다려주세요 🌿', style: GoogleFonts.notoSansKr(fontSize: 13, color: AppColors.brownMid)),
+      ])),
+    );
+  }
 }
 
 // ── Survey Screen ─────────────────────────────────────────────────────────
