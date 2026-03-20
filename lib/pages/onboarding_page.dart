@@ -3,9 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import '../theme/app_theme.dart';
 import '../data/seed_data.dart';
-import '../models/models.dart';
 import '../services/analytics.dart';
 import '../services/gemini_service.dart';
+import '../models/diagnosis_history.dart' show SectionResult;
 
 // ── Survey question model ──────────────────────────────────────────────────
 class _Q {
@@ -97,6 +97,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
   final Map<int, dynamic> _ans = {};
   String? _gender;
   String? _forcedCurlType; // set by image analysis path
+  HairAnalysisResult? _imageResult; // section breakdown from image analysis
   bool _analyzing = false;
   String? _analyzeError;
 
@@ -122,6 +123,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
       GA.event('image_analysis_completed', {'curl_type': result.overallType});
       setState(() {
         _forcedCurlType = result.overallType;
+        _imageResult = result;
         _analyzing = false;
         _step = 11;
       });
@@ -180,7 +182,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                   onSurvey: () => setState(() { _analyzeError = null; _step = 3; }),
                   onImage: _startImageAnalysis,
                 ),
-          11 => _ResultScreen(key: const ValueKey('result'), curlType: _curlType, answers: _ans, gender: _gender, onComplete: (type) {
+          11 => _ResultScreen(key: const ValueKey('result'), curlType: _curlType, answers: _ans, gender: _gender, imageResult: _imageResult, onComplete: (type) {
               GA.event('onboarding_completed', {'curl_type': type});
               widget.onComplete(type);
             }),
@@ -700,8 +702,9 @@ class _ResultScreen extends StatelessWidget {
   final String curlType;
   final Map<int, dynamic> answers;
   final String? gender;
+  final HairAnalysisResult? imageResult;
   final void Function(String) onComplete;
-  const _ResultScreen({super.key, required this.curlType, required this.answers, this.gender, required this.onComplete});
+  const _ResultScreen({super.key, required this.curlType, required this.answers, this.gender, this.imageResult, required this.onComplete});
 
   String get _typeImagePath {
     final prefix = gender == 'male' ? 'm' : 'f';
@@ -768,15 +771,39 @@ class _ResultScreen extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              // Profile chips
-              Text('내 모발 프로필', style: GoogleFonts.notoSansKr(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.brown)),
-              const SizedBox(height: 10),
-              Row(children: [
-                _ProfileChip(_porosityLabel(), Icons.water_drop_rounded, AppColors.teal),
-                const SizedBox(width: 8),
-                _ProfileChip(_thicknessLabel(), Icons.straighten_rounded, AppColors.peach),
-              ]),
-              const SizedBox(height: 20),
+              if (imageResult != null) ...[
+                // 이미지 분석 섹션 결과
+                _SectionConfidenceBadge(imageResult!.confidence),
+                const SizedBox(height: 12),
+                Text('구역별 분석 결과', style: GoogleFonts.notoSansKr(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.brown)),
+                const SizedBox(height: 10),
+                _SectionCard(label: '상단', subtitle: '두피~귀 높이', result: imageResult!.top, color: typeColor),
+                const SizedBox(height: 8),
+                _SectionCard(label: '중단', subtitle: '귀~어깨 높이', result: imageResult!.middle, color: typeColor),
+                const SizedBox(height: 8),
+                _SectionCard(label: '하단', subtitle: '어깨 아래~끝', result: imageResult!.bottom, color: typeColor),
+                const SizedBox(height: 10),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(12)),
+                  child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    const Text('💬 ', style: TextStyle(fontSize: 13)),
+                    Expanded(child: Text(imageResult!.reasoning,
+                      style: GoogleFonts.notoSansKr(fontSize: 13, color: AppColors.brownMid, height: 1.5))),
+                  ]),
+                ),
+                const SizedBox(height: 20),
+              ] else ...[
+                // 설문 기반 모발 프로필
+                Text('내 모발 프로필', style: GoogleFonts.notoSansKr(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.brown)),
+                const SizedBox(height: 10),
+                Row(children: [
+                  _ProfileChip(_porosityLabel(), Icons.water_drop_rounded, AppColors.teal),
+                  const SizedBox(width: 8),
+                  _ProfileChip(_thicknessLabel(), Icons.straighten_rounded, AppColors.peach),
+                ]),
+                const SizedBox(height: 20),
+              ],
 
               // Care approach
               Container(
@@ -819,6 +846,58 @@ class _ResultScreen extends StatelessWidget {
           ),
         ]),
       ),
+    );
+  }
+}
+
+class _SectionCard extends StatelessWidget {
+  final String label, subtitle;
+  final SectionResult result;
+  final Color color;
+  const _SectionCard({required this.label, required this.subtitle, required this.result, required this.color});
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(14),
+      border: Border.all(color: color.withValues(alpha: 0.25)),
+    ),
+    child: Row(children: [
+      Container(
+        width: 44, height: 44,
+        decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(10)),
+        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+          Text(label, style: GoogleFonts.notoSansKr(fontSize: 11, fontWeight: FontWeight.w700, color: color)),
+          Text(result.type, style: GoogleFonts.notoSansKr(fontSize: 14, fontWeight: FontWeight.w900, color: color)),
+        ]),
+      ),
+      const SizedBox(width: 12),
+      Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(subtitle, style: GoogleFonts.notoSansKr(fontSize: 11, color: AppColors.brownLight)),
+        const SizedBox(height: 2),
+        Text(result.reason, style: GoogleFonts.notoSansKr(fontSize: 13, color: AppColors.brownMid, height: 1.4)),
+      ])),
+    ]),
+  );
+}
+
+class _SectionConfidenceBadge extends StatelessWidget {
+  final String confidence;
+  const _SectionConfidenceBadge(this.confidence);
+
+  @override
+  Widget build(BuildContext context) {
+    final (label, color) = switch (confidence) {
+      'high'   => ('분석 신뢰도 높음 ✅', AppColors.teal),
+      'low'    => ('분석 신뢰도 낮음 ⚠️ 설문으로 다시 확인해보세요', Colors.orange),
+      _        => ('분석 신뢰도 보통', AppColors.peach),
+    };
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(20)),
+      child: Text(label, style: GoogleFonts.notoSansKr(fontSize: 12, fontWeight: FontWeight.w600, color: color)),
     );
   }
 }
